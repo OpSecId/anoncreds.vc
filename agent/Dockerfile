@@ -4,7 +4,7 @@ USER root
 
 # install plugins as binaries
 # RUN pip install anoncreds indy-vdr indy-credx aries-askar
-RUN pip install git+https://github.com/jamshale/acapy-plugins@webvh#subdirectory=webvh
+RUN pip install git+https://github.com/OpSecId/acapy-plugins@webvh-anoncreds#subdirectory=webvh
 RUN pip install git+https://github.com/openwallet-foundation/acapy-plugins@main#subdirectory=oid4vc
 RUN pip install git+https://github.com/openwallet-foundation/acapy-plugins@main#subdirectory=connection_update
 RUN pip install git+https://github.com/openwallet-foundation/acapy-plugins@main#subdirectory=basicmessage_storage

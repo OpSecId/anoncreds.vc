@@ -1,4 +1,7 @@
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class Config(object):
     
@@ -17,8 +20,6 @@ class Config(object):
     
     DIDWEBVH_SERVER = os.getenv('DIDWEBVH_SERVER', None)
     DIDWEBVH_WITNESS_KEY = os.getenv('DIDWEBVH_WITNESS_KEY', None)
-    DIDWEBVH_WITNESS_AGENT = os.getenv('DIDWEBVH_WITNESS_AGENT', None)
-    DIDWEBVH_WITNESS_API_KEY = os.getenv('DIDWEBVH_WITNESS_API_KEY', None)
     
     SECRET_KEY = os.getenv('SECRET_KEY')
     
