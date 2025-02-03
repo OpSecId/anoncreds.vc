@@ -1,0 +1,43 @@
+---
+admin: [0.0.0.0, 8020]
+inbound-transport:
+   - [ws, 0:0:0:0:0:0:0:0, 8021]
+   - [http, 0:0:0:0:0:0:0:0, 8022]
+outbound-transport: [ws, http]
+
+auto-provision: true
+recreate-wallet: false
+
+wallet-type: askar-anoncreds
+wallet-storage-type: postgres_storage
+
+auto-ping-connection: true
+auto-accept-invites: true
+auto-accept-requests: true
+auto-respond-messages: true
+
+auto-store-credential: true
+
+auto-respond-credential-offer: true
+auto-respond-credential-request: true
+auto-respond-credential-proposal: true
+
+auto-verify-presentation: true
+auto-respond-presentation-request: true
+
+preserve-exchange-records: true
+
+plugin:
+  - webvh
+  # - oid4vc
+  - connection_update.v1_0
+  # - basicmessage_storage.v1_0
+  # - multitenant_provider.v1_0
+
+plugin-config-value:
+  # - oid4vci.host=
+  - did-webvh.server_url=https://identifier.me
+  #  - did-webvh.role=controller # endorser | controller
+  #  - did-webvh.endorser_invitation=http://localhost:3000?oob=eyJAdHlwZSI6ICJodHRwczovL2RpZGNvbW0ub3JnL291dC1vZi1iYW5kLzEuMS9pbnZpdGF0aW9uIiwgIkBpZCI6ICJlMzI5OGIyNS1mZjRlLTRhZmItOTI2Yi03ZDcyZmVlMjQ1ODgiLCAibGFiZWwiOiAid2VidmgtZW5kb3JzZXIiLCAiaGFuZHNoYWtlX3Byb3RvY29scyI6IFsiaHR0cHM6Ly9kaWRjb21tLm9yZy9kaWRleGNoYW5nZS8xLjAiXSwgInNlcnZpY2VzIjogW3siaWQiOiAiI2lubGluZSIsICJ0eXBlIjogImRpZC1jb21tdW5pY2F0aW9uIiwgInJlY2lwaWVudEtleXMiOiBbImRpZDprZXk6ejZNa3FDQ1pxNURSdkdMcDV5akhlZlZTa2JhN0tYWlQ1Nld2SlJacEQ2Z3RvRzU0I3o2TWtxQ0NacTVEUnZHTHA1eWpIZWZWU2tiYTdLWFpUNTZXdkpSWnBENmd0b0c1NCJdLCAic2VydmljZUVuZHBvaW50IjogImh0dHA6Ly9sb2NhbGhvc3Q6MzAwMCJ9XX0
+  #  - did-webvh.auto_endorse=true
+  #  - did-webvh.strict_ssl=false
