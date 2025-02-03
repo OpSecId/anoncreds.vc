@@ -2,7 +2,7 @@ import os
 
 class Config(object):
     
-    DOMAIN = os.getenv('DOMAIN')
+    DOMAIN = os.getenv('DOMAIN', 'localhost')
     ENDPOINT = f"https://{DOMAIN}"
     
     

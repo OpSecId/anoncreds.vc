@@ -4,7 +4,7 @@ from app.services import AskarStorage
 from config import Config
 
 
-class WitnessController:
+class AgentController:
     def __init__(self):
         self.label = "Demo Issuer"
         self.namespace = "demo"
@@ -18,73 +18,74 @@ class WitnessController:
         }
         
     async def provision(self):
-        domain = self.server.split('://')[-1]
-        print('Updating wallet kid')
-        r = requests.put(
-            f'{self.endpoint}/wallet/keys',
-            headers=self.headers,
-            json={
-                'kid': f'webvh:{domain}@witnessKey',
-                'multikey': self.key
-            }
-        )
-        print(r.text)
-        try:
-            print('Configuring webvh')
-            r = requests.post(
-                f'{self.endpoint}/did/webvh/configuration',
-                headers=self.headers,
-                json={
-                    'server_url': self.server,
-                    'witness_key': self.key,
-                    'witness': True
-                }
-            )
-            print(r.text)
-            assert r.status_code == 200
-            assert r.json()['status'] == 'success'
-        except:
-            pass
-        try:
-            print('Creating webvh')
-            r = requests.post(
-                f'{self.endpoint}/did/webvh/create',
-                headers=self.headers,
-                json={
-                    'options': {
-                        'identifier': self.identifier,
-                        'namespace': self.namespace,
-                        'parameters': {
-                            'portable': False,
-                            'prerotation': False
-                        }
-                    }
-                }
-            )
-            print(r.text)
-            pass
-        except:
-            pass
-        did_web = f'did:web:{domain}:{self.namespace}:{self.identifier}'
-        try:
-            print('Resolving webvh')
-            r = requests.get(
-                f'{self.endpoint}/resolver/resolve/{did_web}',
-                headers=self.headers
-            )
-            print(r.text)
-            did_document = r.json()['did_document']
-            did_webvh = did_document.get('alsoKnownAs')[0]
-            did_webvh_kid = did_document.get('verificationMethod')[0].get('id')
-            issuer_info = {
-                'id': did_webvh,
-                'verificationMethod': did_webvh_kid
-            }
-            print(issuer_info)
-            self.issuer = issuer_info
-        except:
-            pass
-        await self.setup_anoncreds()
+        await AskarStorage().update('demo', 'default', {})
+        # domain = self.server.split('://')[-1]
+        # print('Updating wallet kid')
+        # r = requests.put(
+        #     f'{self.endpoint}/wallet/keys',
+        #     headers=self.headers,
+        #     json={
+        #         'kid': f'webvh:{domain}@witnessKey',
+        #         'multikey': self.key
+        #     }
+        # )
+        # print(r.text)
+        # try:
+        #     print('Configuring webvh')
+        #     r = requests.post(
+        #         f'{self.endpoint}/did/webvh/configuration',
+        #         headers=self.headers,
+        #         json={
+        #             'server_url': self.server,
+        #             'witness_key': self.key,
+        #             'witness': True
+        #         }
+        #     )
+        #     print(r.text)
+        #     assert r.status_code == 200
+        #     assert r.json()['status'] == 'success'
+        # except:
+        #     pass
+        # try:
+        #     print('Creating webvh')
+        #     r = requests.post(
+        #         f'{self.endpoint}/did/webvh/create',
+        #         headers=self.headers,
+        #         json={
+        #             'options': {
+        #                 'identifier': self.identifier,
+        #                 'namespace': self.namespace,
+        #                 'parameters': {
+        #                     'portable': False,
+        #                     'prerotation': False
+        #                 }
+        #             }
+        #         }
+        #     )
+        #     print(r.text)
+        #     pass
+        # except:
+        #     pass
+        # did_web = f'did:web:{domain}:{self.namespace}:{self.identifier}'
+        # try:
+        #     print('Resolving webvh')
+        #     r = requests.get(
+        #         f'{self.endpoint}/resolver/resolve/{did_web}',
+        #         headers=self.headers
+        #     )
+        #     print(r.text)
+        #     did_document = r.json()['did_document']
+        #     did_webvh = did_document.get('alsoKnownAs')[0]
+        #     did_webvh_kid = did_document.get('verificationMethod')[0].get('id')
+        #     issuer_info = {
+        #         'id': did_webvh,
+        #         'verificationMethod': did_webvh_kid
+        #     }
+        #     print(issuer_info)
+        #     self.issuer = issuer_info
+        # except:
+        #     pass
+        # await self.setup_anoncreds()
         
     def create_did_webvh(self):
         pass

@@ -13,7 +13,7 @@ def create_app(config_class=Config):
 
     @app.route("/")
     def index():
-        return render_template()
+        return render_template('pages/index.jinja')
 
     @app.route("/offer")
     def credential_offer():
