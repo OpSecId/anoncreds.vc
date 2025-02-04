@@ -1,7 +1,11 @@
 from flask import Flask, render_template
 from flask_cors import CORS
 from flask_qrcode import QRcode
+from flask_session import Session
 from config import Config
+import asyncio
+from app.services import AskarStorage
+from app.utils import id_to_url
 
 
 def create_app(config_class=Config):
@@ -10,10 +14,15 @@ def create_app(config_class=Config):
 
     CORS(app)
     QRcode(app)
+    Session(app)
 
     @app.route("/")
     def index():
-        return render_template('pages/index.jinja')
+        demo = asyncio.run(AskarStorage().fetch('demo', 'default'))
+        return render_template(
+            'pages/index.jinja',
+            demo=demo
+        )
 
     @app.route("/offer")
     def credential_offer():

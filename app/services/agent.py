@@ -2,6 +2,7 @@ import os
 import uuid
 import requests
 from app.services import AskarStorage
+from app.utils import id_to_url
 from config import Config
 
 
@@ -45,7 +46,7 @@ class AgentController:
             self.did_webvh = r.json()['did_document']['alsoKnownAs'][0]
         except:
             pass
-        # await self.setup_anoncreds()
+        await self.setup_anoncreds()
         
     def create_did_webvh(self, namespace, identifier):
         print('Creating DID')
@@ -145,10 +146,20 @@ class AgentController:
                 'rev_reg_def_id': rev_def_id
             }
         )
-        # print(r.text)
+        print(r.text)
         print(schema_id)
         print(cred_def_id)
         print(rev_def_id)
+        await AskarStorage().update(
+            'demo', 'default', {
+                'schema_id': schema_id,
+                'schema_url': id_to_url(schema_id),
+                'cre_def_id': cred_def_id,
+                'cre_def_url': id_to_url(cred_def_id),
+                'rev_def_id': rev_def_id,
+                'rev_def_url': id_to_url(rev_def_id)
+            }
+        )
         
     def bind_key(self, verification_method, public_key_multibase):
         r = requests.put(

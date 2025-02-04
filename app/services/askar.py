@@ -83,10 +83,6 @@ class AskarStorage:
     async def store(self, category, data_key, data, tags=None):
         store = await self.open()
         try:
-            current_app.logger.warning('Storing Data')
-            current_app.logger.warning(category)
-            current_app.logger.warning(data_key)
-            # current_app.logger.warning(data)
             async with store.session() as session:
                 await session.insert(
                     category,
@@ -100,7 +96,6 @@ class AskarStorage:
     async def update(self, category, data_key, data, tags=None):
         store = await self.open()
         try:
-            current_app.logger.warning('Updating Data')
             async with store.session() as session:
                 await session.replace(
                     category,
