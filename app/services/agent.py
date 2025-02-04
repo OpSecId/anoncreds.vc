@@ -1,4 +1,5 @@
 import os
+import uuid
 import requests
 from app.services import AskarStorage
 from config import Config
@@ -8,9 +9,11 @@ class AgentController:
     def __init__(self):
         self.label = "Demo Issuer"
         self.namespace = "demo"
-        self.identifier = "issuer"
+        self.identifier = str(uuid.uuid4())
         self.issuer = None
         self.webvh_server = os.getenv('DIDWEBVH_SERVER')
+        self.did_web = f'did:web:{self.webvh_server.split("://")[-1]}:{self.namespace}:{self.identifier}'
+        self.did_webvh = None
         self.witness_key = os.getenv('DIDWEBVH_WITNESS_KEY')
         self.endpoint = os.getenv('AGENT_ADMIN_ENDPOINT')
         # self.headers = {
@@ -30,70 +33,62 @@ class AgentController:
             }
         )
         print(r.text)
-        # print('Creating DID')
-        # try:
-        #     r = requests.post(
-        #         f'{self.endpoint}/did/webvh/create',
-        #         headers=self.headers,
-        #         json={
-        #             'options': {
-        #                 'identifier': self.identifier,
-        #                 'namespace': self.namespace,
-        #                 'parameters': {
-        #                     'portable': False,
-        #                     'prerotation': False
-        #                 }
-        #             }
-        #         }
-        #     )
-        #     print(r.text)
-        #     pass
-        # except:
-        #     pass
-        # did_web = f'did:web:{domain}:{self.namespace}:{self.identifier}'
-        # try:
-        #     print('Resolving webvh')
-        #     r = requests.get(
-        #         f'{self.endpoint}/resolver/resolve/{did_web}',
-        #         headers=self.headers
-        #     )
-        #     print(r.text)
-        #     did_document = r.json()['did_document']
-        #     did_webvh = did_document.get('alsoKnownAs')[0]
-        #     did_webvh_kid = did_document.get('verificationMethod')[0].get('id')
-        #     issuer_info = {
-        #         'id': did_webvh,
-        #         'verificationMethod': did_webvh_kid
-        #     }
-        #     print(issuer_info)
-        #     self.issuer = issuer_info
-        # except:
-        #     pass
+        self.create_did_webvh(self.namespace, self.identifier)
+        print('Resolving DID')
+        try:
+            r = requests.get(
+                f'{self.endpoint}/resolver/resolve/{self.did_web}',
+                # headers=self.headers,
+            )
+            print(self.did_web)
+            # print(r.text)
+            self.did_webvh = r.json()['did_document']['alsoKnownAs'][0]
+        except:
+            pass
         # await self.setup_anoncreds()
         
-    def create_did_webvh(self):
-        pass
+    def create_did_webvh(self, namespace, identifier):
+        print('Creating DID')
+        try:
+            r = requests.post(
+                f'{self.endpoint}/did/webvh/create',
+                # headers=self.headers,
+                json={
+                    'options': {
+                        'identifier': identifier,
+                        'namespace': namespace,
+                        'parameters': {
+                            'portable': False,
+                            'prerotation': False
+                        }
+                    }
+                }
+            )
+            print(r.text)
+        except:
+            pass
         
     async def setup_anoncreds(self):
-        print('Setting up anoncreds')
-        issuer_id = self.issuer['id']
+        print('Setting up AnonCreds')
+        options = {
+            'verificationMethod': f'{self.did_webvh}#key-01',
+            'serviceEndpoint': f'{self.webvh_server}/resources'
+        }
+        issuer_id = self.did_webvh
         schema_name = 'ExampleCredential'
         schema_version = '1.0'
         schema_attributes = ['name', 'description']
-        # cred_def_tag = f'{schema_name}-def'
-        # rev_def_tag = f'{schema_name}-rev'
-        # revocation=True
-        # revocation_max=8
+        cred_def_tag = f'{schema_name}-def'
+        rev_def_tag = f'{schema_name}-rev'
+        revocation=True
+        revocation_max=8
         try:
-            print('Creating schema')
+            print('Schema')
             r = requests.post(
                 f'{self.endpoint}/anoncreds/schema',
-                headers=self.headers,
+                # headers=self.headers,
                 json={
-                    'options': {
-                        'verificationMethod': self.issuer['verificationMethod'],
-                        'serviceEndpoint': self.server
-                    },
+                    'options': options,
                     'schema': {
                         'attrNames': schema_attributes,
                         'issuerId': issuer_id,
@@ -102,51 +97,58 @@ class AgentController:
                     }
                 }
             )
-            print(r.text)
             schema_id = r.json()['schema_state']['schema_id']
-            print(schema_id)
         except:
             pass
         
-        # r = requests.post(
-        #     f'{self.endpoint}/anoncreds/credential-definition',
-        #     headers=self.headers,
-        #     json={
-        #         'options': {
-        #             'support_revocation': revocation
-        #         },
-        #         'credential_definition': {
-        #             'issuerId': issuer_id,
-        #             'schemaId': schema_id,
-        #             'tag': cred_def_tag,
-        #         }
-        #     }
-        # )
-        # cred_def_id = r.json()['credential_definition_state']['credential_definition_id']
+        try:
+            print('Credential Definition')
+            r = requests.post(
+                f'{self.endpoint}/anoncreds/credential-definition',
+                # headers=self.headers,
+                json={
+                    'options': options | {'support_revocation': revocation},
+                    'credential_definition': {
+                        'issuerId': issuer_id,
+                        'schemaId': schema_id,
+                        'tag': cred_def_tag,
+                    }
+                }
+            )
+            cred_def_id = r.json()['credential_definition_state']['credential_definition_id']
+        except:
+            pass
+        try:
+            print('Revocation Registry')
+            r = requests.post(
+                f'{self.endpoint}/anoncreds/revocation-registry-definition',
+                # headers=self.headers,
+                json={
+                    'options': options,
+                    'revocation_registry_definition': {
+                        'credDefId': cred_def_id,
+                        'issuerId': issuer_id,
+                        'maxCredNum': revocation_max,
+                        'tag': rev_def_tag
+                    }
+                }
+            )
+            rev_def_id = r.json()['revocation_registry_definition_state']['revocation_registry_definition_id']
+        except:
+            pass
         
-        # r = requests.post(
-        #     f'{self.endpoint}/anoncreds/revocation-registry-definition',
-        #     headers=self.headers,
-        #     json={
-        #         'options': {},
-        #         'revocation_registry_definition': {
-        #             'credDefId': cred_def_id,
-        #             'issuerId': issuer_id,
-        #             'maxCredNum': revocation_max,
-        #             'tag': rev_def_tag
-        #         }
-        #     }
-        # )
-        # rev_def_id = r.json()['revocation_registry_definition_state']['revocation_registry_definition_id']
-        
-        # r = requests.post(
-        #     f'{self.endpoint}/anoncreds/revocation-list',
-        #     headers=self.headers,
-        #     json={
-        #         'options': {},
-        #         'rev_reg_def_id': rev_def_id
-        #     }
-        # )
+        r = requests.post(
+            f'{self.endpoint}/anoncreds/revocation-list',
+            # headers=self.headers,
+            json={
+                'options': options,
+                'rev_reg_def_id': rev_def_id
+            }
+        )
+        # print(r.text)
+        print(schema_id)
+        print(cred_def_id)
+        print(rev_def_id)
         
     def bind_key(self, verification_method, public_key_multibase):
         r = requests.put(
