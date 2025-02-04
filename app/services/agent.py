@@ -12,7 +12,7 @@ class AgentControllerError(Exception):
 
 class AgentController:
     def __init__(self):
-        self.label = "Demo Issuer"
+        self.label = "AnonCreds Demo"
         self.namespace = "demo"
         self.identifier = str(uuid.uuid4())
         self.issuer = None
@@ -74,7 +74,12 @@ class AgentController:
             pass
         
     async def setup_anoncreds(self):
-        print('Setting up AnonCreds')
+        print('Setting up AnonCreds Demo')
+        demo = await AskarStorage().fetch('demo', 'default')
+        if demo:
+            print('Demo already set')
+            return
+            
         options = {
             'verificationMethod': f'{self.did_webvh}#key-01',
             'serviceEndpoint': f'{self.webvh_server}/resources'
@@ -158,8 +163,8 @@ class AgentController:
             'demo', 'default', {
                 'schema_id': schema_id,
                 'schema_url': id_to_url(schema_id),
-                'cre_def_id': cred_def_id,
-                'cre_def_url': id_to_url(cred_def_id),
+                'cred_def_id': cred_def_id,
+                'cred_def_url': id_to_url(cred_def_id),
                 'rev_def_id': rev_def_id,
                 'rev_def_url': id_to_url(rev_def_id)
             }
@@ -198,16 +203,17 @@ class AgentController:
                 ]
             },
             'filter': {
-                'indy': {
+                'anoncreds': {
                     'cred_def_id': cred_def_id,
                 }
             }
         }
         r = requests.post(
             endpoint,
-            headers=self.headers,
+            # headers=self.headers,
             json=cred_offer
         )
+        print(r.text)
         try:
             return r.json()
         except:
@@ -227,7 +233,7 @@ class AgentController:
             'auto_remove': False,
             'auto_verify': True,
             'presentation_request': {
-                'indy': {
+                'anoncreds': {
                     'name': name,
                     'version': '1.0',
                     'nonce': str(randint(1, 99999999)),
@@ -247,10 +253,9 @@ class AgentController:
         }
         r = requests.post(
             endpoint,
-            headers=self.headers,
+            # headers=self.headers,
             json=pres_req
         )
-        print(r.text)
         try:
             return r.json()
         except:
@@ -259,7 +264,7 @@ class AgentController:
     def create_oob_inv(self, alias=None, cred_ex_id=None, pres_ex_id=None, handshake=False):
         endpoint = f'{self.endpoint}/out-of-band/create-invitation?auto_accept=true'
         invitation = {
-            "my_label": "Orgbook Publisher Service",
+            "my_label": self.label,
             "attachments": [],
             "handshake_protocols": [],
         }
@@ -280,11 +285,11 @@ class AgentController:
             )
         r = requests.post(
             endpoint,
-            headers=self.headers,
+            # headers=self.headers,
             json=invitation
         )
         try:
-            return r.json()
+            return r.json()['invitation']
         except:
             raise AgentControllerError('No invitation')
         
@@ -292,7 +297,7 @@ class AgentController:
         endpoint = f'{self.endpoint}/present-proof-2.0/records/{pres_ex_id}'
         r = requests.get(
             endpoint,
-            headers=self.headers
+            # headers=self.headers
         )
         try:
             return r.json()

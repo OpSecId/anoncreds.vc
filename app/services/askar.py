@@ -28,9 +28,6 @@ class AskarStorage:
     async def fetch(self, category, data_key):
         store = await self.open()
         try:
-            current_app.logger.warning('Fetching Data')
-            current_app.logger.warning(category)
-            current_app.logger.warning(data_key)
             async with store.session() as session:
                 entry = await session.fetch(category, data_key)
             return json.loads(entry.value)
