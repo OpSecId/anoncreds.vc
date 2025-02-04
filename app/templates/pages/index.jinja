@@ -6,9 +6,9 @@
             <h3 class="card-title mb-1">
                 <div class="text-reset">AnonCreds & WebVH</div>
             </h3>
-            <div class="text-secondary"><a target="_blank" href="{{demo.get('schema_url')}}">Schema</a></div>
-            <div class="text-secondary"><a target="_blank" href="{{demo.get('cre_def_url')}}">Credential Definition</a></div>
-            <div class="text-secondary"><a target="_blank" href="{{demo.get('rev_def_url')}}">Revocation Registry</a></div>
+            <div class="text-secondary"><a target="_blank" href="{{session['demo'].get('schema_url')}}">Schema</a></div>
+            <div class="text-secondary"><a target="_blank" href="{{session['demo'].get('cre_def_url')}}">Credential Definition</a></div>
+            <div class="text-secondary"><a target="_blank" href="{{session['demo'].get('rev_def_url')}}">Revocation Registry</a></div>
         </div>
     </div>
 {% endblock %}

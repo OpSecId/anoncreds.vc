@@ -4,7 +4,11 @@ import requests
 from app.services import AskarStorage
 from app.utils import id_to_url
 from config import Config
+from random import randint
 
+
+class AgentControllerError(Exception):
+    """Generic AgentControllerError Error."""
 
 class AgentController:
     def __init__(self):
@@ -76,9 +80,9 @@ class AgentController:
             'serviceEndpoint': f'{self.webvh_server}/resources'
         }
         issuer_id = self.did_webvh
-        schema_name = 'ExampleCredential'
+        schema_name = 'Demo Credential'
         schema_version = '1.0'
-        schema_attributes = ['name', 'description']
+        schema_attributes = ['attributeClaim', 'predicateClaim']
         cred_def_tag = f'{schema_name}-def'
         rev_def_tag = f'{schema_name}-rev'
         revocation=True
@@ -170,17 +174,127 @@ class AgentController:
             }
         )
         
-    def create_invitation(self, alias):
-        payload = {
-            "alias": alias,
-            "handshake_protocols": [
-                "https://didcomm.org/didexchange/1.0"
-            ],
-            "my_label": self.label
+    
+    def offer_credential(self, alias, cred_def_id, attributes):
+        cred_offer = self.create_cred_offer(cred_def_id, attributes)
+        invitation = self.create_oob_inv(
+            alias=alias, 
+            cred_ex_id=cred_offer['cred_ex_id'], 
+            handshake=True
+        )
+        return cred_offer['cred_ex_id'], invitation
+    
+    def create_cred_offer(self, cred_def_id, attributes):
+        endpoint = f'{self.endpoint}/issue-credential-2.0/create'
+        cred_offer = {
+            'auto_remove': False,
+            'credential_preview': {
+                "@type": "issue-credential/2.0/credential-preview",
+                "attributes": [
+                    {
+                        "name": attribute,
+                        "value": attributes[attribute]
+                    } for attribute in attributes
+                ]
+            },
+            'filter': {
+                'indy': {
+                    'cred_def_id': cred_def_id,
+                }
+            }
         }
         r = requests.post(
-            f'{self.endpoint}/out-of-band/create-invitation',
+            endpoint,
             headers=self.headers,
-            json=payload
+            json=cred_offer
         )
-        return r.json()
+        try:
+            return r.json()
+        except:
+            raise AgentControllerError('No exchange')
+    
+    def request_presentation(self, name, cred_def_id, attributes):
+        pres_req = self.create_pres_req(name, cred_def_id, attributes)
+        invitation = self.create_oob_inv(
+            pres_ex_id=pres_req['pres_ex_id'], 
+            handshake=False
+        )
+        return pres_req['pres_ex_id'], invitation
+        
+    def create_pres_req(self, name, cred_def_id, attributes):
+        endpoint = f'{self.endpoint}/present-proof-2.0/create-request'
+        pres_req = {
+            'auto_remove': False,
+            'auto_verify': True,
+            'presentation_request': {
+                'indy': {
+                    'name': name,
+                    'version': '1.0',
+                    'nonce': str(randint(1, 99999999)),
+                    'requested_attributes': {
+                        'requestedAttributes': {
+                            'names': attributes,
+                            'restrictions':[
+                                {
+                                    'cred_def_id': cred_def_id
+                                }
+                            ]
+                        }
+                    },
+                    'requested_predicates': {}
+                }
+            }
+        }
+        r = requests.post(
+            endpoint,
+            headers=self.headers,
+            json=pres_req
+        )
+        print(r.text)
+        try:
+            return r.json()
+        except:
+            raise AgentControllerError('No exchange')
+    
+    def create_oob_inv(self, alias=None, cred_ex_id=None, pres_ex_id=None, handshake=False):
+        endpoint = f'{self.endpoint}/out-of-band/create-invitation?auto_accept=true'
+        invitation = {
+            "my_label": "Orgbook Publisher Service",
+            "attachments": [],
+            "handshake_protocols": [],
+        }
+        if pres_ex_id:
+            invitation['attachments'].append({
+                "id":   pres_ex_id,
+                "type": "present-proof"
+            })
+        if cred_ex_id:
+            invitation['attachments'].append({
+                "id":   cred_ex_id,
+                "type": "credential-offer"
+            })
+        if handshake:
+            invitation['alias'] = alias
+            invitation['handshake_protocols'].append(
+                "https://didcomm.org/didexchange/1.0"
+            )
+        r = requests.post(
+            endpoint,
+            headers=self.headers,
+            json=invitation
+        )
+        try:
+            return r.json()
+        except:
+            raise AgentControllerError('No invitation')
+        
+    def verify_presentation(self, pres_ex_id):
+        endpoint = f'{self.endpoint}/present-proof-2.0/records/{pres_ex_id}'
+        r = requests.get(
+            endpoint,
+            headers=self.headers
+        )
+        try:
+            return r.json()
+        except:
+            raise AgentControllerError('No exchange')
