@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <title>{{ title }}</title>
@@ -12,11 +13,30 @@
         <div class="container-tight">
             <div class="text-center mb-4">
                 <a href="{{ url_for('index') }}" class="navbar-brand navbar-brand-autodark">
-                    <center><img src="https://raw.githubusercontent.com/hyperledger/anoncreds-spec/main/spec/images/logo/hl_anoncreds_colour.svg" width="100%" alt=""></center>
+                    <center><img
+                            src="https://raw.githubusercontent.com/hyperledger/anoncreds-spec/main/spec/images/logo/hl_anoncreds_colour.svg"
+                            width="100%" alt=""></center>
                 </a>
             </div>
-        <!-- Page body -->
-        {% block page %}{% endblock %}
+            <!-- Page body -->
+            {% block page %}{% endblock %}
+            <div class="alert alert-info" role="alert">
+                <div class="d-flex">
+                    <div>
+                        <!-- Download SVG icon from http://tabler.io/icons/icon/info-circle -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="icon alert-icon icon-2">
+                            <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>
+                            <path d="M12 9h.01"></path>
+                            <path d="M11 12h1v4h1"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        {{ session.get('client_id') }}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <!-- Libs JS -->
