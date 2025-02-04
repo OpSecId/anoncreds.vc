@@ -13,27 +13,16 @@ class AgentController:
         self.webvh_server = os.getenv('DIDWEBVH_SERVER')
         self.witness_key = os.getenv('DIDWEBVH_WITNESS_KEY')
         self.endpoint = os.getenv('AGENT_ADMIN_ENDPOINT')
-        self.headers = {
-            'X-API-KEY': os.getenv('AGENT_ADMIN_API_KEY')
-        }
+        # self.headers = {
+        #     'X-API-KEY': os.getenv('AGENT_ADMIN_API_KEY')
+        # }
         
     async def provision(self):
         await AskarStorage().update('demo', 'default', {})
-        webvh_domain = self.webvh_server.split('://')[-1]
-        print('Updating witness key')
-        r = requests.put(
-            f'{self.endpoint}/wallet/keys',
-            headers=self.headers,
-            json={
-                'kid': f'webvh:{webvh_domain}@witnessKey',
-                'multikey': self.witness_key
-            }
-        )
-        print(r.text)
         print('Configuring webvh')
         r = requests.post(
             f'{self.endpoint}/did/webvh/configuration',
-            headers=self.headers,
+            # headers=self.headers,
             json={
                 'server_url': self.webvh_server,
                 'witness_key': self.witness_key,

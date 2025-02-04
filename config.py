@@ -15,7 +15,7 @@ class Config(object):
     SESSION_COOKIE_SAMESITE = 'Strict'
     SESSION_COOKIE_HTTPONLY = 'True'
     
-    AGENT_ADMIN_API_KEY = os.getenv('AGENT_ADMIN_API_KEY')
+    # AGENT_ADMIN_API_KEY = os.getenv('AGENT_ADMIN_API_KEY')
     AGENT_ADMIN_ENDPOINT = os.getenv('AGENT_ADMIN_ENDPOINT')
     
     DIDWEBVH_SERVER = os.getenv('DIDWEBVH_SERVER', None)
