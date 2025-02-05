@@ -17,15 +17,29 @@ def create_app(config_class=Config):
     QRcode(app)
     Session(app)
 
+    @app.before_request
+    def before_request_callback():
+        session['endpoint'] = Config.ENDPOINT
+        if not session.get('client_id'):
+            client_id = session['client_id'] = str(uuid.uuid4())
+            invitation = AgentController().create_oob_connection(client_id)
+            asyncio.run(AskarStorage().store('exchanges', client_id, invitation['invitation']))
+            session['invitation'] = f'{Config.ENDPOINT}/exchanges/{client_id}'
+            session['connection'] = AgentController().get_connection_id(client_id)
+        if not session.get('demo'):
+            session['demo'] = asyncio.run(AskarStorage().fetch('demo', 'default'))
+
     @app.route("/")
     def index():
-        session['client_id'] = str(uuid.uuid4())
-        session['demo'] = asyncio.run(AskarStorage().fetch('demo', 'default'))
         return render_template('pages/index.jinja')
 
     @app.route("/offer")
-    def credential_offer():
-        cred_ex_id, invitation = AgentController().offer_credential(
+    def credential_offer(client_id: str):
+        if client_id != session.get('client_id'):
+            return {}, 400
+        connection_id = AgentController().get_connection_id(client_id)
+        cred_ex_id, invitation = AgentController().send_offer(
+            connection_id,
             session['client_id'],
             session['demo'].get('cred_def_id'),
             {
@@ -33,26 +47,22 @@ def create_app(config_class=Config):
                 'predicateClaim': '2025'
             }
         )
-        asyncio.run(AskarStorage().store('exchanges', cred_ex_id, invitation))
-        session['cred_ex_id'] = cred_ex_id
-        session['offer_ex_url'] = f'{Config.ENDPOINT}/exchanges/{cred_ex_id}'
-        return render_template('pages/offer.jinja')
 
     @app.route("/request")
-    def presentation_request():
-        pres_ex_id, invitation = AgentController().request_presentation(
+    def presentation_request(client_id: str):
+        if client_id != session.get('client_id'):
+            return {}, 400
+        connection_id = AgentController().get_connection_id(client_id)
+        pres_ex_id, invitation = AgentController().send_request(
+            connection_id,
             'Demo Presentation',
             session['demo'].get('cred_def_id'),
             ['attributeClaim']
         )
-        asyncio.run(AskarStorage().store('exchanges', pres_ex_id, invitation))
-        session['pres_ex_id'] = pres_ex_id
-        session['pres_ex_url'] = f'{Config.ENDPOINT}/exchanges/{pres_ex_id}'
-        return render_template('pages/request.jinja')
 
-    @app.route("/exchanges/<exchange_id>")
-    def exchanges(exchange_id: str):
-        invitation = asyncio.run(AskarStorage().fetch('exchanges', exchange_id))
+    @app.route("/exchanges/<client_id>")
+    def exchanges(client_id: str):
+        invitation = asyncio.run(AskarStorage().fetch('exchanges', client_id))
         if invitation:
             return invitation
         return {}, 404

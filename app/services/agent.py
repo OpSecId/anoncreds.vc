@@ -303,3 +303,87 @@ class AgentController:
             return r.json()
         except:
             raise AgentControllerError('No exchange')
+
+    
+    def create_oob_connection(self, client_id):
+        endpoint = f'{self.endpoint}/out-of-band/create-invitation?auto_accept=true'
+        invitation = {
+            "alias": client_id,
+            "my_label": client_id,
+            "handshake_protocols": ["https://didcomm.org/didexchange/1.0"],
+        }
+        r = requests.post(
+            endpoint,
+            json=invitation
+        )
+        try:
+            return r.json()
+        except:
+            raise AgentControllerError('No invitation')
+    
+    def get_connection_id(self, client_id):
+        endpoint = f'{self.endpoint}/connections?alias={client_id}'
+        r = requests.get(
+            endpoint
+        )
+        try:
+            return r.json()['results'][0]
+        except:
+            raise AgentControllerError('No connection')
+    
+    def send_offer(self, connection_id, cred_def_id, attributes):
+        endpoint = f'{self.endpoint}/issue-credential-2.0/send'
+        cred_offer = {
+            'auto_remove': False,
+            'connection_id': connection_id,
+            'credential_preview': {
+                "@type": "issue-credential/2.0/credential-preview",
+                "attributes": [
+                    {
+                        "name": attribute,
+                        "value": attributes[attribute]
+                    } for attribute in attributes
+                ]
+            },
+            'filter': {
+                'anoncreds': {
+                    'cred_def_id': cred_def_id,
+                }
+            }
+        }
+        r = requests.post(
+            endpoint,
+            json=cred_offer
+        )
+        print(r.text)
+    
+    def send_request(self, connection_id, name, cred_def_id, attributes):
+        endpoint = f'{self.endpoint}/present-proof-2.0/send-request'
+        pres_req = {
+            'auto_remove': False,
+            'auto_verify': True,
+            'connection_id': connection_id,
+            'presentation_request': {
+                'anoncreds': {
+                    'name': name,
+                    'version': '1.0',
+                    'nonce': str(randint(1, 99999999)),
+                    'requested_attributes': {
+                        'requestedAttributes': {
+                            'names': attributes,
+                            'restrictions':[
+                                {
+                                    'cred_def_id': cred_def_id
+                                }
+                            ]
+                        }
+                    },
+                    'requested_predicates': {}
+                }
+            }
+        }
+        r = requests.post(
+            endpoint,
+            json=pres_req
+        )
+        print(r.text)
