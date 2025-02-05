@@ -13,9 +13,9 @@ class Config(object):
     ASKAR_DB = os.getenv('ASKAR_DB', 'sqlite://app.db')
     
     
-    SESSION_TYPE = 'cachelib'
+    # SESSION_TYPE = 'cachelib'
     SESSION_SERIALIZATION_FORMAT = 'json'
-    SESSION_CACHELIB = FileSystemCache(threshold=500, cache_dir="app/session")
+    # SESSION_CACHELIB = FileSystemCache(threshold=500, cache_dir="app/session")
     SESSION_COOKIE_NAME  = 'AnonCreds'
     SESSION_COOKIE_SAMESITE = 'Strict'
     SESSION_COOKIE_HTTPONLY = 'True'

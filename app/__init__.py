@@ -15,7 +15,7 @@ def create_app(config_class=Config):
 
     CORS(app)
     QRcode(app)
-    Session(app)
+    # Session(app)
 
     @app.before_request
     def before_request_callback():
