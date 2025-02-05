@@ -321,7 +321,7 @@ class AgentController:
         except:
             raise AgentControllerError('No invitation')
     
-    def get_connection_id(self, client_id):
+    def get_connection(self, client_id):
         endpoint = f'{self.endpoint}/connections?alias={client_id}'
         r = requests.get(
             endpoint
