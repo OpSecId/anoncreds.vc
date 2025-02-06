@@ -11,7 +11,7 @@
 <body class="d-flex flex-column">
     <div class="page page-center">
         <div class="container-tight">
-            <div class="text-center mb-3">
+            <div class="text-center mb-4">
                 <a href="{{ url_for('index') }}" class="navbar-brand navbar-brand-autodark">
                     <center><img
                             src="https://raw.githubusercontent.com/hyperledger/anoncreds-spec/main/spec/images/logo/hl_anoncreds_colour.svg"
@@ -19,12 +19,19 @@
                 </a>
             </div>
             <div class="text-center mb-3">
-                {% if session['connection'].get('state') == 'active' %}
-                <div class="alert alert-info" role="alert">
-                {% else %}
-                <div class="alert alert-warning" role="alert">
-                {% endif %}
+                <div class="alert" role="alert">
                     <div class="d-flex">
+                        <a href="{{ url_for('restart') }}">
+                            <!-- Download SVG icon from http://tabler.io/icons/icon/info-circle -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round"
+                                class="icon alert-icon icon-tabler-refresh">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" />
+                                <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" />
+                            </svg>
+                        </a>
                         <div>
                             {{ session.get('client_id') }}
                         </div>
@@ -37,6 +44,7 @@
     </div>
     <!-- Libs JS -->
     <!-- Tabler Core -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="{{ url_for('static', filename='js/tabler.min.js') }}" defer=""></script>
 
 </body>

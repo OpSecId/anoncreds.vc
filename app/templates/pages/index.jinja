@@ -2,11 +2,11 @@
 {% block page %}
 <div class="card">
     <div class="card-body">
-        <div class="row align-items-center">
-            <div class="col-4">
+        {# <div class="row align-items-center"> #}
+            {# <div class="col-4">
                 <img src="{{ qrcode(session['invitation'], error_correction='H', border=1) }}" alt="" class="rounded">
-            </div>
-            <div class="col">
+            </div> #}
+            {# <div class="col"> #}
                 <h3 class="card-title mb-1">
                     <div class="text-reset">AnonCreds & WebVH</div>
                 </h3>
@@ -16,28 +16,22 @@
                         Definition</a></div>
                 <div class="text-secondary"><a target="_blank" href="{{session['demo'].get('rev_def_url')}}">Revocation
                         Registry</a></div>
-            </div>
-        </div>
+            {# </div> #}
+        {# </div> #}
     </div>
     <div class="card-footer">
         <div class="row g-2 align-items-center">
-            {% if session['connection'].get('state') == 'active' %}
             <div class="col-6"><a href="#" onclick="credentialOffer()"
                     class="btn btn-sm btn-outline-dark w-100">Credential Offer</a></div>
             <div class="col-6"><a href="#" onclick="presentationRequest()"
                     class="btn btn-sm btn-outline-dark w-100">Presentation Request</a></div>
-            {% else %}
-            <div class="col-6"><a href="#" class="btn btn-sm btn-outline-dark w-100 disabled">Credential Offer</a></div>
-            <div class="col-6"><a href="#" class="btn btn-sm btn-outline-dark w-100 disabled">Presentation Request</a>
-            </div>
-            {% endif %}
         </div>
     </div>
 </div>
 
 <script>
     function credentialOffer() {
-        $.get("{{session['endpoint']}}/offer?client_id={{session['client_id']}}")
+        $.get("{{ session['endpoint'] }}/offer?client_id={{ session['client_id'] }}")
     }
     function presentationRequest() {
         $.get("{{session['endpoint']}}/request?client_id={{session['client_id']}}")

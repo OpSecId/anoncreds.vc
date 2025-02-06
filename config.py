@@ -6,8 +6,8 @@ load_dotenv()
 
 class Config(object):
     
-    DOMAIN = os.getenv('DOMAIN', 'localhost')
-    ENDPOINT = f"https://{DOMAIN}"
+    DOMAIN = os.getenv('DOMAIN', 'localhost:5000')
+    ENDPOINT = f"http://{DOMAIN}" if DOMAIN == 'localhost:5000' else f"https://{DOMAIN}"
     
     
     ASKAR_DB = os.getenv('ASKAR_DB', 'sqlite://app.db')

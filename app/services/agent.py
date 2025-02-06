@@ -26,7 +26,11 @@ class AgentController:
         # }
         
     async def provision(self):
-        await AskarStorage().update('demo', 'default', {})
+        try:
+            demo = await AskarStorage().fetch('demo', 'default')
+            return demo.get('schema_id')
+        except:
+            pass
         print('Configuring webvh')
         r = requests.post(
             f'{self.endpoint}/did/webvh/configuration',
@@ -159,7 +163,7 @@ class AgentController:
         print(schema_id)
         print(cred_def_id)
         print(rev_def_id)
-        await AskarStorage().update(
+        await AskarStorage().store(
             'demo', 'default', {
                 'schema_id': schema_id,
                 'schema_url': id_to_url(schema_id),
@@ -355,7 +359,12 @@ class AgentController:
             endpoint,
             json=cred_offer
         )
-        print(r.text)
+        # print(r.text)
+        try:
+            return r.json()
+        except:
+            raise AgentControllerError('No offer')
+            
     
     def send_request(self, connection_id, name, cred_def_id, attributes):
         endpoint = f'{self.endpoint}/present-proof-2.0/send-request'
@@ -387,3 +396,7 @@ class AgentController:
             json=pres_req
         )
         print(r.text)
+        try:
+            return r.json()
+        except:
+            raise AgentControllerError('No request')

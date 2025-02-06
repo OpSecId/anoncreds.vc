@@ -11,13 +11,12 @@ class AskarStorage:
     def __init__(self):
         self.db = Config.ASKAR_DB
         self.key = Store.generate_raw_key(
-            hashlib.md5(Config.DOMAIN.encode()).hexdigest()
+            hashlib.md5(Config.SECRET_KEY.encode()).hexdigest()
         )
 
     async def provision(self, recreate=False):
         logger.warning(self.db)
         await Store.provision(self.db, "raw", self.key, recreate=recreate)
-        await self.store('demo', 'default', {})
         
     async def get_wallet_info(self, client_id):
         return await self.fetch(category='wallet', data_key=client_id)
