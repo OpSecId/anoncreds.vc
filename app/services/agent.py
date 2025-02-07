@@ -151,15 +151,15 @@ class AgentController:
         except:
             pass
         
-        r = requests.post(
-            f'{self.endpoint}/anoncreds/revocation-list',
-            # headers=self.headers,
-            json={
-                'options': options,
-                'rev_reg_def_id': rev_def_id
-            }
-        )
-        print(r.text)
+        # r = requests.post(
+        #     f'{self.endpoint}/anoncreds/revocation-list',
+        #     # headers=self.headers,
+        #     json={
+        #         'options': options,
+        #         'rev_reg_def_id': rev_def_id
+        #     }
+        # )
+        # print(r.text)
         print(schema_id)
         print(cred_def_id)
         print(rev_def_id)
