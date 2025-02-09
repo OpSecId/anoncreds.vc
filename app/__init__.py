@@ -5,6 +5,7 @@ from flask_session import Session
 from config import Config
 import asyncio
 import uuid
+import time
 from app.services import AskarStorage, AgentController
 from app.utils import id_to_url
 
@@ -22,14 +23,18 @@ def create_app(config_class=Config):
         session['endpoint'] = Config.ENDPOINT
         if 'client_id' not in session:
             session['client_id'] = str(uuid.uuid4())
-            session['invitation'] = AgentController().create_oob_connection(session['client_id'])
-        if not session.get('demo'):
             session['demo'] = asyncio.run(AskarStorage().fetch('demo', 'default'))
+            
+            agent = AgentController()
+            # session['demo']['rev_def_id'] = agent.get_active_registry(session['demo']['cred_def_id'])
+            # session['demo']['rev_def_url'] = id_to_url(session['demo']['rev_def_id'])
+            session['invitation'] = agent.create_oob_connection(session['client_id'])
 
     @app.route("/")
     def index():
         print(session['client_id'])
-        session['connection'] = AgentController().get_connection(session['client_id'])
+        agent = AgentController()
+        session['connection'] = agent.get_connection(session['client_id'])
         if session['connection'].get('state') != 'active':
             return render_template('pages/connection.jinja')
         return render_template('pages/index.jinja')
@@ -67,7 +72,9 @@ def create_app(config_class=Config):
                 connection.get('connection_id'),
                 'Demo Presentation',
                 session['demo'].get('cred_def_id'),
-                ['attributeClaim']
+                ['attributeClaim'],
+                ['predicateClaim', '>=', 2025],
+                int(time.time())
             )
             print(pres_req.get('pres_ex_id'))
             return {}, 201

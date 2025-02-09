@@ -92,10 +92,9 @@ class AgentController:
         schema_name = 'Demo Credential'
         schema_version = '1.0'
         schema_attributes = ['attributeClaim', 'predicateClaim']
-        cred_def_tag = f'{schema_name}-def'
         rev_def_tag = f'{schema_name}-rev'
         revocation=True
-        revocation_max=8
+        revocation_size=100
         try:
             print('Schema')
             r = requests.post(
@@ -112,6 +111,7 @@ class AgentController:
                 }
             )
             schema_id = r.json()['schema_state']['schema_id']
+            print(schema_id)
         except:
             pass
         
@@ -121,35 +121,39 @@ class AgentController:
                 f'{self.endpoint}/anoncreds/credential-definition',
                 # headers=self.headers,
                 json={
-                    'options': options | {'support_revocation': revocation},
+                    'options': options | {
+                        'support_revocation': revocation, 
+                        'revocation_registry_size': revocation_size
+                    },
                     'credential_definition': {
                         'issuerId': issuer_id,
                         'schemaId': schema_id,
-                        'tag': cred_def_tag,
+                        'tag': schema_name,
                     }
                 }
             )
             cred_def_id = r.json()['credential_definition_state']['credential_definition_id']
+            print(cred_def_id)
         except:
             pass
-        try:
-            print('Revocation Registry')
-            r = requests.post(
-                f'{self.endpoint}/anoncreds/revocation-registry-definition',
-                # headers=self.headers,
-                json={
-                    'options': options,
-                    'revocation_registry_definition': {
-                        'credDefId': cred_def_id,
-                        'issuerId': issuer_id,
-                        'maxCredNum': revocation_max,
-                        'tag': rev_def_tag
-                    }
-                }
-            )
-            rev_def_id = r.json()['revocation_registry_definition_state']['revocation_registry_definition_id']
-        except:
-            pass
+        # try:
+        #     print('Revocation Registry')
+        #     r = requests.post(
+        #         f'{self.endpoint}/anoncreds/revocation-registry-definition',
+        #         # headers=self.headers,
+        #         json={
+        #             'options': options,
+        #             'revocation_registry_definition': {
+        #                 'credDefId': cred_def_id,
+        #                 'issuerId': issuer_id,
+        #                 'maxCredNum': revocation_max,
+        #                 'tag': rev_def_tag
+        #             }
+        #         }
+        #     )
+        #     rev_def_id = r.json()['revocation_registry_definition_state']['revocation_registry_definition_id']
+        # except:
+        #     pass
         
         # r = requests.post(
         #     f'{self.endpoint}/anoncreds/revocation-list',
@@ -160,9 +164,10 @@ class AgentController:
         #     }
         # )
         # print(r.text)
-        print(schema_id)
-        print(cred_def_id)
-        print(rev_def_id)
+        rev_def_id = self.get_active_registry(cred_def_id)
+        # print(schema_id)
+        # print(cred_def_id)
+        # print(rev_def_id)
         await AskarStorage().store(
             'demo', 'default', {
                 'schema_id': schema_id,
@@ -173,6 +178,15 @@ class AgentController:
                 'rev_def_url': id_to_url(rev_def_id)
             }
         )
+        
+    def get_active_registry(self, cred_def_id):
+        r = requests.get(
+            f'{self.endpoint}/anoncreds/revocation/registries',
+            params={
+                'cred_def_id': cred_def_id
+            }
+        )
+        return r.json()['rev_reg_ids'][-1]
         
     def bind_key(self, verification_method, public_key_multibase):
         r = requests.put(
@@ -366,7 +380,7 @@ class AgentController:
             raise AgentControllerError('No offer')
             
     
-    def send_request(self, connection_id, name, cred_def_id, attributes):
+    def send_request(self, connection_id, name, cred_def_id, attributes, predicate, timestamp):
         endpoint = f'{self.endpoint}/present-proof-2.0/send-request'
         pres_req = {
             'auto_remove': False,
@@ -386,8 +400,23 @@ class AgentController:
                                 }
                             ]
                         }
-                    },
-                    'requested_predicates': {}
+                    } if attributes else {},
+                    'requested_predicates': {
+                        'requestedPredicate': {
+                            'name': predicate[0],
+                            'p_type': predicate[1],
+                            'p_value': predicate[2],
+                            'restrictions':[
+                                {
+                                    'cred_def_id': cred_def_id
+                                }
+                            ]
+                        }
+                    } if predicate else {},
+                    'non_revoked': {
+                        'from': timestamp,
+                        'to': timestamp
+                    } if timestamp else {}
                 }
             }
         }
