@@ -6,6 +6,8 @@ load_dotenv()
 
 class Config(object):
     
+    APP_TITLE = 'AnonCreds w/ WebVH'
+    
     DOMAIN = os.getenv('DOMAIN', 'localhost:5000')
     ENDPOINT = f"http://{DOMAIN}" if DOMAIN == 'localhost:5000' else f"https://{DOMAIN}"
     
@@ -27,4 +29,20 @@ class Config(object):
     DIDWEBVH_WITNESS_KEY = os.getenv('DIDWEBVH_WITNESS_KEY', None)
     
     SECRET_KEY = os.getenv('SECRET_KEY')
+    
+    DEMO = {
+        'issuer': 'WebVH AnonCreds',
+        'name': 'DITCO Demo',
+        'version': '1.0',
+        'attributes': ['email', 'attendanceDateInt'],
+        'size': 100,
+        'preview': {
+            'email': 'jane.doe@example.com',
+            'attendanceDateInt': '20250212'
+        },
+        'request': {
+            'requestedAttributes': ['email'],
+            'requestedPredicates': ['attendanceDateInt', '>=', 20250212],
+        }
+    }
     

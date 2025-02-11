@@ -1,40 +1,186 @@
 {% extends('layouts/base.jinja') %}
 {% block page %}
 <div class="card">
-    <div class="card-body">
-        {# <div class="row align-items-center"> #}
-            {# <div class="col-4">
-                <img src="{{ qrcode(session['invitation'], error_correction='H', border=1) }}" alt="" class="rounded">
-            </div> #}
-            {# <div class="col"> #}
-                <h3 class="card-title mb-1">
-                    <div class="text-reset">AnonCreds & WebVH</div>
-                </h3>
-                <div class="text-secondary"><a target="_blank" href="{{session['demo'].get('schema_url')}}">Schema</a>
+
+    <div class="card-header">
+        <div>
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    {% if session.get('connection').get('state') == 'active' %}
+                    <span class="status-indicator status-green status-indicator-animated">
+                        {% else %}
+                        <span class="status-indicator status-warning status-indicator-animated">
+                            {% endif %}
+                            <span class="status-indicator-circle"></span>
+                            <span class="status-indicator-circle"></span>
+                            <span class="status-indicator-circle"></span>
+                        </span>
                 </div>
-                <div class="text-secondary"><a target="_blank" href="{{session['demo'].get('cred_def_url')}}">Credential
-                        Definition</a></div>
-                <div class="text-secondary"><a target="_blank" href="{{session['demo'].get('rev_def_url')}}">Revocation
-                        Registry</a></div>
-            {# </div> #}
-        {# </div> #}
+                <div class="col">
+                    <div class="card-title">Connection</div>
+
+                    <div class="card-subtitle">
+                        <div class="text-secondary">
+                            <ul class="list-inline list-inline-dots mb-0">
+                                <li class="list-inline-item">
+                                    {% if session.get('connection').get('state') == 'active' %}
+                                    <span class="text-green">{{session.get('connection').get('state') }}</span>
+                                    {% else %}
+                                    <span class="text-warning">{{session.get('connection').get('state') }}</span>
+                                    {% endif %}
+                                </li>
+                                <li class="list-inline-item">{{ session.get('connection').get('connection_id') }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-actions">
+            <a href="{{ url_for('index') }}" class="btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="icon icon-tabler icon-tabler-refresh">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" />
+                    <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" />
+                </svg>
+                Refresh
+            </a>
+            <a href="{{ url_for('restart') }}" class="btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="icon icon-tabler icon-tabler-trash">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M4 7l16 0" />
+                    <path d="M10 11l0 6" />
+                    <path d="M14 11l0 6" />
+                    <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                    <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                </svg>
+                Restart
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-4">
+                <img src="{{ qrcode(session['invitation']['invitation_url'], error_correction='H', border=1) }}" alt=""
+                    class="rounded">
+            </div>
+            <div class="col">
+                <h3 class="card-title mb-3">
+                    <div class="text-reset"><a target="_blank" , href="{{session['agent']['endpoint']}}">{{
+                            session['agent']['label'] }}</a> - {{ demo.get('name') }} {{ demo.get('version') }}</div>
+                    <div class="text-secondary">
+                        <ul class="list-inline list-inline-dots mb-0">
+                            <li class="list-inline-item"><a target="_blank"
+                                    href="{{session['demo'].get('schema_url')}}">Schema</a></li>
+                            <li class="list-inline-item"><a target="_blank"
+                                    href="{{session['demo'].get('cred_def_url')}}">Credential Definition</a></li>
+                            <li class="list-inline-item"><a target="_blank"
+                                    href="{{session['demo'].get('rev_def_url')}}">Revocation Registry</a></li>
+                        </ul>
+                    </div>
+                </h3>
+                <div class="tracking">
+                    {% for entry in status %}
+                    {% if entry == 0 %}
+                    <div class="tracking-block bg-success" data-bs-toggle="tooltip" data-bs-placement="top" title="ok">
+                    </div>
+                    {% elif entry == 1 %}
+                    <div class="tracking-block bg-danger" data-bs-toggle="tooltip" data-bs-placement="top"
+                        title="revoked"></div>
+                    {% else %}
+                    <div class="tracking-block bg-warning" data-bs-toggle="tooltip" data-bs-placement="top"
+                        title="unknown"></div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                <hr>
+                <div class="card-title text-secondary mb-3">Credential Preview</div>
+                <div class="datagrid">
+                    {% for attribute in demo.get('preview') %}
+                    <div class="datagrid-item">
+                        <div class="datagrid-title">{{ attribute }}</div>
+                        <div class="datagrid-content">{{ demo.get('preview').get(attribute) }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="row g-2 align-items-center">
+                            <div class="col">
+                                <h4 class="card-title m-0">
+                                    <a href="#">Issuance</a>
+                                </h4>
+                                <div class="text-secondary">{{session['demo'].get('cred_ex_id') }}</div>
+                                {% if session['demo'].get('cred_ex_id') %}
+                                <div class="small mt-1">
+                                    {% if session['demo']['issuance'].get('state') == 'done' %}
+                                    <span class="badge bg-green"></span> 
+                                    {% elif session['demo']['issuance'].get('state') == 'abandonned' %}
+                                    <span class="badge bg-danger"></span> 
+                                    {% else %}
+                                    <span class="badge bg-warning"></span> 
+                                    {% endif %}
+                                    {{session['demo']['issuance'].get('state') }}
+                                </div>
+                                {% else %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row g-2 align-items-center">
+                            <div class="col">
+                                <h4 class="card-title m-0">
+                                    <a href="#">Presentation</a>
+                                </h4>
+                                <div class="text-secondary">{{session['demo'].get('pres_ex_id') }}</div>
+                                {% if session['demo'].get('pres_ex_id') %}
+                                <div class="small mt-1">
+                                    {% if session['demo']['presentation'].get('state') == 'done' %}
+                                        {% if session['demo']['presentation'].get('verified') %}
+                                            <span class="badge bg-green"></span> 
+                                        {% else %}
+                                            <span class="badge bg-danger"></span> 
+                                        {% endif %}
+                                    {% elif session['demo']['presentation'].get('state') == 'abandonned' %}
+                                    <span class="badge bg-danger"></span> 
+                                    {% else %}
+                                    <span class="badge bg-warning"></span> 
+                                    {% endif %}
+                                    {{session['demo']['presentation'].get('state') }}
+                                </div>
+                                {% else %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="card-footer">
         <div class="row g-2 align-items-center">
-            <div class="col-6"><a href="#" onclick="credentialOffer()"
-                    class="btn btn-sm btn-outline-dark w-100">Credential Offer</a></div>
-            <div class="col-6"><a href="#" onclick="presentationRequest()"
-                    class="btn btn-sm btn-outline-dark w-100">Presentation Request</a></div>
+            {% if session.get('connection').get('state') == 'active' %}
+            <div class="col-4"><a href="{{ url_for('credential_offer') }}"
+                    class="btn btn-sm btn-outline-dark w-100">Issue</a></div>
+            {% else %}
+            <div class="col-4"><a class="btn btn-sm btn-outline-dark w-100 disabled">Issue</a></div>
+            {% endif %}
+            {% if session.get('demo').get('cred_ex_id') %}
+            <div class="col-4"><a href="{{ url_for('credential_update') }}"
+                    class="btn btn-sm btn-outline-dark w-100">Revoke</a></div>
+            <div class="col-4"><a href="{{ url_for('presentation_request') }}"
+                    class="btn btn-sm btn-outline-dark w-100">Request</a></div>
+            {% else %}
+            <div class="col-4"><a class="btn btn-sm btn-outline-dark w-100 disabled">Revoke</a></div>
+            <div class="col-4"><a class="btn btn-sm btn-outline-dark w-100 disabled">Request</a></div>
+            {% endif %}
         </div>
     </div>
 </div>
-
-<script>
-    function credentialOffer() {
-        $.get("{{ session['endpoint'] }}/offer?client_id={{ session['client_id'] }}")
-    }
-    function presentationRequest() {
-        $.get("{{session['endpoint']}}/request?client_id={{session['client_id']}}")
-    }
-</script>
 {% endblock %}

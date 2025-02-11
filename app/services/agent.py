@@ -4,6 +4,7 @@ import requests
 from app.services import AskarStorage
 from app.utils import id_to_url
 from config import Config
+import time
 from random import randint
 
 
@@ -13,11 +14,12 @@ class AgentControllerError(Exception):
 class AgentController:
     def __init__(self):
         self.label = "AnonCreds Demo"
+        self.webvh_server = os.getenv('DIDWEBVH_SERVER')
+        self.domain = self.webvh_server.split("://")[-1]
         self.namespace = "demo"
         self.identifier = str(uuid.uuid4())
         self.issuer = None
-        self.webvh_server = os.getenv('DIDWEBVH_SERVER')
-        self.did_web = f'did:web:{self.webvh_server.split("://")[-1]}:{self.namespace}:{self.identifier}'
+        self.did_web = f'did:web:{self.domain}:{self.namespace}:{self.identifier}'
         self.did_webvh = None
         self.witness_key = os.getenv('DIDWEBVH_WITNESS_KEY')
         self.endpoint = os.getenv('AGENT_ADMIN_ENDPOINT')
@@ -26,13 +28,19 @@ class AgentController:
         # }
         
     async def provision(self):
-        try:
-            demo = await AskarStorage().fetch('demo', 'default')
-            return demo.get('schema_id')
-        except:
-            pass
-        print('Configuring webvh')
-        r = requests.post(
+        demo = await AskarStorage().fetch('demo', 'default')
+        if not demo:
+            issuer = self.configure_did_webvh()
+            demo = self.setup_anoncreds(issuer)
+            await AskarStorage().store(
+                'demo',
+                'default',
+                demo
+            )
+        # print(demo)
+        
+    def configure_did_webvh(self):
+        requests.post(
             f'{self.endpoint}/did/webvh/configuration',
             # headers=self.headers,
             json={
@@ -41,25 +49,23 @@ class AgentController:
                 'witness': True
             }
         )
-        print(r.text)
         self.create_did_webvh(self.namespace, self.identifier)
+        
         print('Resolving DID')
         try:
+            print(self.did_web)
             r = requests.get(
                 f'{self.endpoint}/resolver/resolve/{self.did_web}',
                 # headers=self.headers,
             )
-            print(self.did_web)
-            # print(r.text)
-            self.did_webvh = r.json()['did_document']['alsoKnownAs'][0]
+            return r.json()['did_document']['alsoKnownAs'][0]
         except:
-            pass
-        await self.setup_anoncreds()
+            raise AgentControllerError('Error resolving DID.')
         
     def create_did_webvh(self, namespace, identifier):
         print('Creating DID')
         try:
-            r = requests.post(
+            requests.post(
                 f'{self.endpoint}/did/webvh/create',
                 # headers=self.headers,
                 json={
@@ -73,111 +79,108 @@ class AgentController:
                     }
                 }
             )
-            print(r.text)
         except:
-            pass
+            raise AgentControllerError('Error creating DID.')
         
-    async def setup_anoncreds(self):
-        print('Setting up AnonCreds Demo')
-        demo = await AskarStorage().fetch('demo', 'default')
-        if demo:
-            print('Demo already set')
-            return
-            
-        options = {
-            'verificationMethod': f'{self.did_webvh}#key-01',
-            'serviceEndpoint': f'{self.webvh_server}/resources'
-        }
-        issuer_id = self.did_webvh
-        schema_name = 'Demo Credential'
-        schema_version = '1.0'
-        schema_attributes = ['attributeClaim', 'predicateClaim']
-        rev_def_tag = f'{schema_name}-rev'
-        revocation=True
-        revocation_size=100
+    def create_schema(self, schema):
+        print('Creating Schema')
         try:
-            print('Schema')
             r = requests.post(
                 f'{self.endpoint}/anoncreds/schema',
                 # headers=self.headers,
                 json={
-                    'options': options,
-                    'schema': {
-                        'attrNames': schema_attributes,
-                        'issuerId': issuer_id,
-                        'name': schema_name,
-                        'version': schema_version
-                    }
+                    'options': {},
+                    'schema': schema
                 }
             )
-            schema_id = r.json()['schema_state']['schema_id']
-            print(schema_id)
+            return r.json()['schema_state']['schema_id']
         except:
             pass
         
+    def create_cred_def(self, cred_def:dict, rev_size:int=0):
+        print('Credential Definition')
         try:
-            print('Credential Definition')
             r = requests.post(
                 f'{self.endpoint}/anoncreds/credential-definition',
                 # headers=self.headers,
                 json={
-                    'options': options | {
-                        'support_revocation': revocation, 
-                        'revocation_registry_size': revocation_size
+                    'options': {
+                        'support_revocation': True if rev_size > 0 else False, 
+                        'revocation_registry_size': rev_size
                     },
-                    'credential_definition': {
-                        'issuerId': issuer_id,
-                        'schemaId': schema_id,
-                        'tag': schema_name,
-                    }
+                    'credential_definition': cred_def
                 }
             )
-            cred_def_id = r.json()['credential_definition_state']['credential_definition_id']
-            print(cred_def_id)
+            return r.json()['credential_definition_state']['credential_definition_id']
         except:
             pass
-        # try:
-        #     print('Revocation Registry')
-        #     r = requests.post(
-        #         f'{self.endpoint}/anoncreds/revocation-registry-definition',
-        #         # headers=self.headers,
-        #         json={
-        #             'options': options,
-        #             'revocation_registry_definition': {
-        #                 'credDefId': cred_def_id,
-        #                 'issuerId': issuer_id,
-        #                 'maxCredNum': revocation_max,
-        #                 'tag': rev_def_tag
-        #             }
-        #         }
-        #     )
-        #     rev_def_id = r.json()['revocation_registry_definition_state']['revocation_registry_definition_id']
-        # except:
-        #     pass
         
-        # r = requests.post(
-        #     f'{self.endpoint}/anoncreds/revocation-list',
-        #     # headers=self.headers,
-        #     json={
-        #         'options': options,
-        #         'rev_reg_def_id': rev_def_id
-        #     }
-        # )
-        # print(r.text)
-        rev_def_id = self.get_active_registry(cred_def_id)
-        # print(schema_id)
-        # print(cred_def_id)
-        # print(rev_def_id)
-        await AskarStorage().store(
-            'demo', 'default', {
-                'schema_id': schema_id,
-                'schema_url': id_to_url(schema_id),
-                'cred_def_id': cred_def_id,
-                'cred_def_url': id_to_url(cred_def_id),
-                'rev_def_id': rev_def_id,
-                'rev_def_url': id_to_url(rev_def_id)
+    def create_rev_def(self, rev_def:dict):
+        try:
+            r = requests.post(
+                f'{self.endpoint}/anoncreds/revocation-registry-definition',
+                # headers=self.headers,
+                json={
+                    'options': {},
+                    'revocation_registry_definition': rev_def
+                }
+            )
+            return r.json()['revocation_registry_definition_state']['revocation_registry_definition_id']
+        except:
+            pass
+        
+    def create_rev_list(self, rev_def_id:str):
+        r = requests.post(
+            f'{self.endpoint}/anoncreds/revocation-list',
+            # headers=self.headers,
+            json={
+                'options': {},
+                'rev_reg_def_id': rev_def_id
             }
         )
+        
+    def setup_anoncreds(self, issuer):
+        print('Setting up AnonCreds Demo')
+        schema_id = self.create_schema(
+            {
+                'issuerId': issuer,
+                'name': Config.DEMO.get('name'),
+                'version': Config.DEMO.get('version'),
+                'attrNames': Config.DEMO.get('attributes'),
+            }
+        )
+        cred_def_id = self.create_cred_def(
+            {
+                'issuerId': issuer,
+                'schemaId': schema_id,
+                'tag': Config.DEMO.get('name'),
+            },
+            Config.DEMO.get('size')
+        )
+        rev_def_id = self.get_active_registry(cred_def_id)
+        # rev_def_id = self.create_rev_def(
+        #     {
+        #         'credDefId': cred_def_id,
+        #         'issuerId': issuer,
+        #         'maxCredNum': Config.DEMO.get('size'),
+        #         'tag': '0'
+        #     }
+        # )
+        # self.create_rev_list(rev_def_id)
+        return {
+            'name': Config.DEMO.get('name'),
+            'issuer': issuer,
+            'version': Config.DEMO.get('version'),
+            'attributes': Config.DEMO.get('attributes'),
+            'registry_size': Config.DEMO.get('size'),
+            'schema_id': schema_id,
+            'cred_def_id': cred_def_id,
+            'rev_def_id': rev_def_id,
+            'preview': Config.DEMO.get('preview'),
+            'request': Config.DEMO.get('request') | {'nonRevocation': int(time.time())}
+        }
+        
+        
         
     def get_active_registry(self, cred_def_id):
         r = requests.get(
@@ -327,7 +330,7 @@ class AgentController:
         endpoint = f'{self.endpoint}/out-of-band/create-invitation?auto_accept=true'
         invitation = {
             "alias": client_id,
-            "my_label": client_id,
+            "my_label": Config.DEMO.get('issuer'),
             "handshake_protocols": ["https://didcomm.org/didexchange/1.0"],
         }
         r = requests.post(
@@ -379,6 +382,12 @@ class AgentController:
         except:
             raise AgentControllerError('No offer')
             
+    
+    def get_status_list(self, rev_def_id):
+        r = requests.get(id_to_url(rev_def_id))
+        status_list_id = r.json()['links'][0]['id']
+        r = requests.get(id_to_url(status_list_id))
+        return r.json()['content']['revocationList']
     
     def send_request(self, connection_id, name, cred_def_id, attributes, predicate, timestamp):
         endpoint = f'{self.endpoint}/present-proof-2.0/send-request'

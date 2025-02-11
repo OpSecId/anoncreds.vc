@@ -3,40 +3,20 @@
 
 <head>
     <meta charset="utf-8">
-    <title>{{ title }}</title>
+    <title>{{ session['title'] }}</title>
     <link rel="icon" href="{{ url_for('static', filename='img/icon.png') }}" type="image/x-icon">
     <link href="{{url_for('static', filename='css/tabler.min.css')}}" rel="stylesheet">
 </head>
 
 <body class="d-flex flex-column">
     <div class="page page-center">
-        <div class="container-tight">
+        <div class="container">
             <div class="text-center mb-4">
                 <a href="{{ url_for('index') }}" class="navbar-brand navbar-brand-autodark">
                     <center><img
                             src="https://raw.githubusercontent.com/hyperledger/anoncreds-spec/main/spec/images/logo/hl_anoncreds_colour.svg"
                             width="100%" alt=""></center>
                 </a>
-            </div>
-            <div class="text-center mb-3">
-                <div class="alert" role="alert">
-                    <div class="d-flex">
-                        <a href="{{ url_for('restart') }}">
-                            <!-- Download SVG icon from http://tabler.io/icons/icon/info-circle -->
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round"
-                                class="icon alert-icon icon-tabler-refresh">
-                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" />
-                                <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" />
-                            </svg>
-                        </a>
-                        <div>
-                            Connection: {{ session.get('connection').get('connection_id') }}
-                        </div>
-                    </div>
-                </div>
             </div>
             <!-- Page body -->
             {% block page %}{% endblock %}

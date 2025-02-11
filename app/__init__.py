@@ -20,24 +20,44 @@ def create_app(config_class=Config):
 
     @app.before_request
     def before_request_callback():
+        session['title'] = Config.APP_TITLE
         session['endpoint'] = Config.ENDPOINT
+        session['agent'] = {
+            'label': Config.DEMO.get('issuer'),
+            'endpoint': Config.AGENT_ADMIN_ENDPOINT
+        }
         if 'client_id' not in session:
             session['client_id'] = str(uuid.uuid4())
-            session['demo'] = asyncio.run(AskarStorage().fetch('demo', 'default'))
+            demo = asyncio.run(AskarStorage().fetch('demo', 'default'))
+            # print(demo)
+            session['demo'] = demo | {
+                'schema_url': id_to_url(demo['schema_id']),
+                'cred_def_url': id_to_url(demo['cred_def_id']),
+                'rev_def_url': id_to_url(demo['rev_def_id']),
+            }
             
             agent = AgentController()
-            # session['demo']['rev_def_id'] = agent.get_active_registry(session['demo']['cred_def_id'])
-            # session['demo']['rev_def_url'] = id_to_url(session['demo']['rev_def_id'])
             session['invitation'] = agent.create_oob_connection(session['client_id'])
 
     @app.route("/")
     def index():
         print(session['client_id'])
         agent = AgentController()
+        session['demo']['issuance'] = {}
+        session['demo']['presentation'] = {}
         session['connection'] = agent.get_connection(session['client_id'])
-        if session['connection'].get('state') != 'active':
-            return render_template('pages/connection.jinja')
-        return render_template('pages/index.jinja')
+        session['status_list'] = agent.get_status_list(session['demo']['rev_def_id'])
+        if session.get('demo').get('cred_ex_id'):
+            session['demo']['issuance'] = {
+                'state': ''
+            }
+        if session.get('demo').get('pres_ex_id'):
+            presentation = agent.verify_presentation(session['demo'].get('pres_ex_id'))
+            session['demo']['presentation'] = {
+                'state': presentation.get('state'),
+                'verified': True if presentation.get('verified') else False
+            }
+        return render_template('pages/index.jinja', demo=session['demo'], status=session['status_list'])
     
     @app.route("/restart")
     def restart():
@@ -46,40 +66,53 @@ def create_app(config_class=Config):
 
     @app.route("/offer")
     def credential_offer():
-        client_id = request.args.get('client_id')
-        print(client_id)
+        print('Offer')
         try:
-            connection = AgentController().get_connection(client_id)
+            connection = AgentController().get_connection(session.get('client_id'))
+            print(connection)
             cred_offer = AgentController().send_offer(
                 connection.get('connection_id'),
                 session['demo'].get('cred_def_id'),
-                {
-                    'attributeClaim': 'Hello World',
-                    'predicateClaim': '2025'
-                }
+                session['demo'].get('preview')
             )
-            print(cred_offer.get('cred_ex_id'))
-            return {}, 201
+            print(cred_offer)
+            session['demo']['cred_ex_id'] = cred_offer.get('cred_ex_id')
         except:
-            return {}, 404
+            pass
+        return redirect(url_for('index'))
+
+    @app.route("/update")
+    def credential_update():
+        try:
+            connection = AgentController().get_connection(session.get('client_id'))
+        except:
+            pass
+        return redirect(url_for('index'))
 
     @app.route("/request")
     def presentation_request():
-        client_id = request.args.get('client_id')
         try:
-            connection = AgentController().get_connection(client_id)
+            connection = AgentController().get_connection(session.get('client_id'))
             pres_req = AgentController().send_request(
                 connection.get('connection_id'),
                 'Demo Presentation',
                 session['demo'].get('cred_def_id'),
-                ['attributeClaim'],
-                ['predicateClaim', '>=', 2025],
-                int(time.time())
+                session['demo'].get('request').get('requestedAttributes'),
+                session['demo'].get('request').get('requestedPredicates'),
+                session['demo'].get('request').get('nonRevocation')
             )
-            print(pres_req.get('pres_ex_id'))
-            return {}, 201
+            session['demo']['pres_ex_id'] = pres_req.get('pres_ex_id')
         except:
-            return {}, 404
+            pass
+        return redirect(url_for('index'))
+
+    @app.route("/resource", methods=["GET", "POST"])
+    def render_resource():
+        resource = {}
+        return render_template(
+            'pages/resource.jinja',
+            resource=resource
+        )
 
     # @app.route("/exchanges/<client_id>")
     # def exchanges(client_id: str):
