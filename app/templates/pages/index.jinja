@@ -65,8 +65,26 @@
     <div class="card-body">
         <div class="row align-items-center">
             <div class="col-4">
+                {% if session.get('connection').get('state') == 'active' %}
+
+                <div class="">
+                    <div class="card-body p-4 py-5 text-center">
+                        <span class="avatar avatar-xl avatar-thumb rounded" style="background-image: url({{ avatars.gravatar(session['client_id']) }})"></span>
+                        <h3 class="mb-0">Connected to</h3>
+                        <p class="text-secondary">{{session.get('connection').get('their_label')}}</p>
+                        <a href="{{ url_for('send_joke') }}" style="text-decoration: none; font-size:24px">🤣</a>
+                        {# <div>
+                            <div class="avatar-list avatar-list-stacked">
+                                <span class="avatar avatar-3 rounded">JL</span>
+                            </div>
+                        </div> #}
+                    </div>
+                </div>
+                {% else %}
                 <img src="{{ qrcode(session['invitation']['invitation_url'], error_correction='H', border=1) }}" alt=""
                     class="rounded">
+                {% endif %}
+
             </div>
             <div class="col">
                 <h3 class="card-title mb-3">
@@ -119,11 +137,11 @@
                                 {% if session['demo'].get('cred_ex_id') %}
                                 <div class="small mt-1">
                                     {% if session['demo']['issuance'].get('state') == 'done' %}
-                                    <span class="badge bg-green"></span> 
+                                    <span class="badge bg-green"></span>
                                     {% elif session['demo']['issuance'].get('state') == 'abandonned' %}
-                                    <span class="badge bg-danger"></span> 
+                                    <span class="badge bg-danger"></span>
                                     {% else %}
-                                    <span class="badge bg-warning"></span> 
+                                    <span class="badge bg-warning"></span>
                                     {% endif %}
                                     {{session['demo']['issuance'].get('state') }}
                                 </div>
@@ -142,15 +160,15 @@
                                 {% if session['demo'].get('pres_ex_id') %}
                                 <div class="small mt-1">
                                     {% if session['demo']['presentation'].get('state') == 'done' %}
-                                        {% if session['demo']['presentation'].get('verified') %}
-                                            <span class="badge bg-green"></span> 
-                                        {% else %}
-                                            <span class="badge bg-danger"></span> 
-                                        {% endif %}
-                                    {% elif session['demo']['presentation'].get('state') == 'abandonned' %}
-                                    <span class="badge bg-danger"></span> 
+                                    {% if session['demo']['presentation'].get('verified') %}
+                                    <span class="badge bg-green"></span>
                                     {% else %}
-                                    <span class="badge bg-warning"></span> 
+                                    <span class="badge bg-danger"></span>
+                                    {% endif %}
+                                    {% elif session['demo']['presentation'].get('state') == 'abandonned' %}
+                                    <span class="badge bg-danger"></span>
+                                    {% else %}
+                                    <span class="badge bg-warning"></span>
                                     {% endif %}
                                     {{session['demo']['presentation'].get('state') }}
                                 </div>
@@ -171,7 +189,7 @@
             {% else %}
             <div class="col-4"><a class="btn btn-sm btn-outline-dark w-100 disabled">Issue</a></div>
             {% endif %}
-            {% if session.get('demo').get('cred_ex_id') %}
+            {% if session.get('demo').get('issuance').get('state') == 'done' %}
             <div class="col-4"><a href="{{ url_for('credential_update') }}"
                     class="btn btn-sm btn-outline-dark w-100">Revoke</a></div>
             <div class="col-4"><a href="{{ url_for('presentation_request') }}"

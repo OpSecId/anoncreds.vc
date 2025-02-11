@@ -90,6 +90,22 @@ async = ["asgiref (>=3.2)"]
 dotenv = ["python-dotenv"]
 
 [[package]]
+name = "flask-avatars"
+version = "0.2.3"
+description = "All avatar generators in one place."
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "Flask-Avatars-0.2.3.tar.gz", hash = "sha256:6e85c8e1009e77cf0a6d06ae7eb1a86bf139db995f1a08df210018b2f1ac4300"},
+    {file = "Flask_Avatars-0.2.3-py2.py3-none-any.whl", hash = "sha256:07c2983277b886252a0de3b3f754bd579032ae3fa4a9cd93a8da3999f6f6b8c3"},
+]
+
+[package.dependencies]
+Flask = "*"
+Pillow = "*"
+
+[[package]]
 name = "flask-cors"
 version = "5.0.0"
 description = "A Flask extension adding a decorator for CORS support"
@@ -390,6 +406,18 @@ typing = ["typing-extensions"]
 xmp = ["defusedxml"]
 
 [[package]]
+name = "pyjokes"
+version = "0.8.3"
+description = "One line jokes for programmers (jokes as a service)"
+optional = false
+python-versions = "<4.0,>=3.9"
+groups = ["main"]
+files = [
+    {file = "pyjokes-0.8.3-py3-none-any.whl", hash = "sha256:12836e61bc7a2c1ff302604a040f0f63ac36c5c947c20319fcb5d1ab37bac46e"},
+    {file = "pyjokes-0.8.3.tar.gz", hash = "sha256:5735d31e973d5b6934b46b89431505733c3110f9b66eac0ff0be86f7f3646423"},
+]
+
+[[package]]
 name = "pypng"
 version = "0.20220715.0"
 description = "Pure Python library for saving and loading PNG images"
@@ -472,5 +500,5 @@ watchdog = ["watchdog (>=2.3)"]
 
 [metadata]
 lock-version = "2.1"
-python-versions = ">=3.12"
-content-hash = "e33592a180e4b3107302833598c51551d561536523208f34f3781a83e48d5c5f"
+python-versions = ">=3.12,<4.0"
+content-hash = "77c26965776156760842e8511d29c348d5255f171acd1c79cd5e9cfef1c5d474"

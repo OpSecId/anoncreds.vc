@@ -2,9 +2,10 @@ import os
 import uuid
 import requests
 from app.services import AskarStorage
-from app.utils import id_to_url
+from app.utils import id_to_url, demo_id
 from config import Config
 import time
+import pyjokes
 from random import randint
 
 
@@ -13,14 +14,12 @@ class AgentControllerError(Exception):
 
 class AgentController:
     def __init__(self):
-        self.label = "AnonCreds Demo"
+        self.label = Config.DEMO.get('issuer')
         self.webvh_server = os.getenv('DIDWEBVH_SERVER')
-        self.domain = self.webvh_server.split("://")[-1]
-        self.namespace = "demo"
-        self.identifier = str(uuid.uuid4())
-        self.issuer = None
-        self.did_web = f'did:web:{self.domain}:{self.namespace}:{self.identifier}'
-        self.did_webvh = None
+        self.did_domain = self.webvh_server.split("://")[-1]
+        self.did_namespace = "demo"
+        self.did_identifier = str(uuid.uuid4())
+        self.did_web = f'did:web:{self.did_domain}:{self.did_namespace}:{self.did_identifier}'
         self.witness_key = os.getenv('DIDWEBVH_WITNESS_KEY')
         self.endpoint = os.getenv('AGENT_ADMIN_ENDPOINT')
         # self.headers = {
@@ -28,16 +27,12 @@ class AgentController:
         # }
         
     async def provision(self):
-        demo = await AskarStorage().fetch('demo', 'default')
-        if not demo:
-            issuer = self.configure_did_webvh()
-            demo = self.setup_anoncreds(issuer)
+        if not await AskarStorage().fetch('demo', demo_id(Config.DEMO)):
             await AskarStorage().store(
                 'demo',
-                'default',
-                demo
+                demo_id(Config.DEMO),
+                Config.DEMO | self.setup_demo()
             )
-        # print(demo)
         
     def configure_did_webvh(self):
         requests.post(
@@ -49,7 +44,7 @@ class AgentController:
                 'witness': True
             }
         )
-        self.create_did_webvh(self.namespace, self.identifier)
+        self.create_did_webvh(self.did_namespace, self.did_identifier)
         
         print('Resolving DID')
         try:
@@ -139,19 +134,20 @@ class AgentController:
             }
         )
         
-    def setup_anoncreds(self, issuer):
+    def setup_demo(self):
         print('Setting up AnonCreds Demo')
+        issuer_id = self.configure_did_webvh()
         schema_id = self.create_schema(
             {
-                'issuerId': issuer,
+                'issuerId': issuer_id,
                 'name': Config.DEMO.get('name'),
                 'version': Config.DEMO.get('version'),
-                'attrNames': Config.DEMO.get('attributes'),
+                'attrNames':[attribute for attribute in Config.DEMO.get('preview')],
             }
         )
         cred_def_id = self.create_cred_def(
             {
-                'issuerId': issuer,
+                'issuerId': issuer_id,
                 'schemaId': schema_id,
                 'tag': Config.DEMO.get('name'),
             },
@@ -168,16 +164,10 @@ class AgentController:
         # )
         # self.create_rev_list(rev_def_id)
         return {
-            'name': Config.DEMO.get('name'),
-            'issuer': issuer,
-            'version': Config.DEMO.get('version'),
-            'attributes': Config.DEMO.get('attributes'),
-            'registry_size': Config.DEMO.get('size'),
+            'issuer_id': issuer_id,
             'schema_id': schema_id,
             'cred_def_id': cred_def_id,
             'rev_def_id': rev_def_id,
-            'preview': Config.DEMO.get('preview'),
-            'request': Config.DEMO.get('request') | {'nonRevocation': int(time.time())}
         }
         
         
@@ -256,7 +246,7 @@ class AgentController:
             'presentation_request': {
                 'anoncreds': {
                     'name': name,
-                    'version': '1.0',
+                    'version': Config.DEMO.get('version'),
                     'nonce': str(randint(1, 99999999)),
                     'requested_attributes': {
                         'requestedAttributes': {
@@ -322,6 +312,17 @@ class AgentController:
         )
         try:
             return r.json()
+        except:
+            raise AgentControllerError('No exchange')
+        
+    def verify_offer(self, cred_ex_id):
+        endpoint = f'{self.endpoint}/issue-credential-2.0/records/{cred_ex_id}'
+        r = requests.get(
+            endpoint,
+            # headers=self.headers
+        )
+        try:
+            return r.json().get('cred_ex_record')
         except:
             raise AgentControllerError('No exchange')
 
@@ -398,7 +399,7 @@ class AgentController:
             'presentation_request': {
                 'anoncreds': {
                     'name': name,
-                    'version': '1.0',
+                    'version': Config.DEMO.get('version'),
                     'nonce': str(randint(1, 99999999)),
                     'requested_attributes': {
                         'requestedAttributes': {
@@ -438,3 +439,27 @@ class AgentController:
             return r.json()
         except:
             raise AgentControllerError('No request')
+    
+    def revoke_credential(self, cred_ex_id:str, publish:bool=True):
+        endpoint = f'{self.endpoint}/anoncreds/revocation/revoke'
+        r = requests.post(
+            endpoint,
+            json={
+                'cred_ex_id': cred_ex_id,
+                'notify': True,
+                'publish': publish
+            }
+        )
+        try:
+            return r.json()['results'][0]
+        except:
+            raise AgentControllerError('No connection')
+    
+    def send_joke(self, connection_id):
+        endpoint = f'{self.endpoint}/connections/{connection_id}/send-message'
+        requests.post(
+            endpoint,
+            json={
+                'content': pyjokes.get_joke()
+            }
+        )

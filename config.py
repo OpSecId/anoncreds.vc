@@ -1,23 +1,25 @@
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 from cachelib.file import FileSystemCache
 
 load_dotenv()
+Path("session").mkdir(parents=True, exist_ok=True)
 
 class Config(object):
     
-    APP_TITLE = 'AnonCreds w/ WebVH'
+    APP_TITLE = 'AnonCreds + WebVH'
     
     DOMAIN = os.getenv('DOMAIN', 'localhost:5000')
     ENDPOINT = f"http://{DOMAIN}" if DOMAIN == 'localhost:5000' else f"https://{DOMAIN}"
     
     
-    ASKAR_DB = os.getenv('ASKAR_DB', 'sqlite://app.db')
+    ASKAR_DB = os.getenv('ASKAR_DB', 'sqlite://session/app.db')
     
     
-    # SESSION_TYPE = 'cachelib'
+    SESSION_TYPE = 'cachelib'
     SESSION_SERIALIZATION_FORMAT = 'json'
-    # SESSION_CACHELIB = FileSystemCache(threshold=500, cache_dir="app/session")
+    SESSION_CACHELIB = FileSystemCache(threshold=500, cache_dir="session")
     SESSION_COOKIE_NAME  = 'AnonCreds'
     SESSION_COOKIE_SAMESITE = 'Strict'
     SESSION_COOKIE_HTTPONLY = 'True'
@@ -31,18 +33,17 @@ class Config(object):
     SECRET_KEY = os.getenv('SECRET_KEY')
     
     DEMO = {
-        'issuer': 'WebVH AnonCreds',
-        'name': 'DITCO Demo',
+        'name': 'User Onboarding',
         'version': '1.0',
-        'attributes': ['email', 'attendanceDateInt'],
+        'issuer': 'WebVH AnonCreds Demo',
         'size': 100,
         'preview': {
             'email': 'jane.doe@example.com',
-            'attendanceDateInt': '20250212'
+            'onboarded': '20250106'
         },
         'request': {
-            'requestedAttributes': ['email'],
-            'requestedPredicates': ['attendanceDateInt', '>=', 20250212],
+            'attributes': ['email'],
+            'predicate': ['onboarded', '>=', 20250101],
         }
     }
     

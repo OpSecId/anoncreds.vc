@@ -2,12 +2,13 @@ from flask import Flask, render_template, session, redirect, url_for, request
 from flask_cors import CORS
 from flask_qrcode import QRcode
 from flask_session import Session
+from flask_avatars import Avatars
 from config import Config
 import asyncio
 import uuid
 import time
 from app.services import AskarStorage, AgentController
-from app.utils import id_to_url
+from app.utils import id_to_url, demo_id, hash
 
 
 def create_app(config_class=Config):
@@ -16,7 +17,8 @@ def create_app(config_class=Config):
 
     CORS(app)
     QRcode(app)
-    # Session(app)
+    Session(app)
+    Avatars(app)
 
     @app.before_request
     def before_request_callback():
@@ -27,9 +29,8 @@ def create_app(config_class=Config):
             'endpoint': Config.AGENT_ADMIN_ENDPOINT
         }
         if 'client_id' not in session:
-            session['client_id'] = str(uuid.uuid4())
-            demo = asyncio.run(AskarStorage().fetch('demo', 'default'))
-            # print(demo)
+            session['client_id'] = hash(str(uuid.uuid4()))
+            demo = asyncio.run(AskarStorage().fetch('demo', demo_id(Config.DEMO)))
             session['demo'] = demo | {
                 'schema_url': id_to_url(demo['schema_id']),
                 'cred_def_url': id_to_url(demo['cred_def_id']),
@@ -48,8 +49,10 @@ def create_app(config_class=Config):
         session['connection'] = agent.get_connection(session['client_id'])
         session['status_list'] = agent.get_status_list(session['demo']['rev_def_id'])
         if session.get('demo').get('cred_ex_id'):
+            print(session.get('demo').get('cred_ex_id'))
+            offer = agent.verify_offer(session['demo'].get('cred_ex_id'))
             session['demo']['issuance'] = {
-                'state': ''
+                'state': offer.get('state')
             }
         if session.get('demo').get('pres_ex_id'):
             presentation = agent.verify_presentation(session['demo'].get('pres_ex_id'))
@@ -97,9 +100,9 @@ def create_app(config_class=Config):
                 connection.get('connection_id'),
                 'Demo Presentation',
                 session['demo'].get('cred_def_id'),
-                session['demo'].get('request').get('requestedAttributes'),
-                session['demo'].get('request').get('requestedPredicates'),
-                session['demo'].get('request').get('nonRevocation')
+                session['demo'].get('request').get('attributes'),
+                session['demo'].get('request').get('predicate'),
+                int(time.time())
             )
             session['demo']['pres_ex_id'] = pres_req.get('pres_ex_id')
         except:
@@ -113,6 +116,12 @@ def create_app(config_class=Config):
             'pages/resource.jinja',
             resource=resource
         )
+    @app.route("/joke")
+    def send_joke():
+        AgentController().send_joke(
+            session.get('connection').get('connection_id')
+        )
+        return redirect(url_for('index'))
 
     # @app.route("/exchanges/<client_id>")
     # def exchanges(client_id: str):
