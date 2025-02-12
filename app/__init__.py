@@ -74,6 +74,7 @@ def create_app(config_class=Config):
             )
             print(cred_offer)
             session['demo']['cred_ex_id'] = cred_offer.get('cred_ex_id')
+            session['demo'].pop('pres_ex_id')
             session['demo']['presentation'] = []
         except:
             pass
@@ -82,6 +83,7 @@ def create_app(config_class=Config):
     @app.route("/update")
     def credential_update():
         AgentController().revoke_credential(session['demo'].get('cred_ex_id'))
+        session['demo'].pop('pres_ex_id')
         session['demo']['presentation'] = []
         return redirect(url_for('index'))
 
