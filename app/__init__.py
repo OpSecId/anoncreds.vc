@@ -39,6 +39,9 @@ def create_app(config_class=Config):
             
             agent = AgentController()
             session['invitation'] = agent.create_oob_connection(session['client_id'])
+            oob_id = session['invitation']['oob_id']
+            asyncio.run(AskarStorage().store('invitation', oob_id, session['invitation']['invitation']))
+            session['invitation']['short_url'] = f'{Config.ENDPOINT}/invitation/{oob_id}'
 
     @app.route("/")
     def index():
@@ -126,6 +129,13 @@ def create_app(config_class=Config):
             session.get('connection').get('connection_id')
         )
         return redirect(url_for('index'))
+
+    @app.route("/invitation/<oob_id>")
+    def exchanges(oob_id: str):
+        invitation = asyncio.run(AskarStorage().fetch('invitation', oob_id))
+        if not invitation:
+            return {}, 404
+        return invitation
 
     # @app.route("/exchanges/<client_id>")
     # def exchanges(client_id: str):

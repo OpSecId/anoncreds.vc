@@ -27,7 +27,8 @@ class AgentController:
         # }
         
     async def provision(self):
-        if not await AskarStorage().fetch('demo', demo_id(Config.DEMO)):
+        demo = await AskarStorage().fetch('demo', demo_id(Config.DEMO))
+        if not demo:
             await AskarStorage().store(
                 'demo',
                 demo_id(Config.DEMO),

@@ -1,0 +1,8 @@
+<div class="datagrid mb-3">
+    {% for attribute in demo.get('preview') %}
+    <div class="datagrid-item">
+        <div class="datagrid-title">{{ attribute }}</div>
+        <div class="datagrid-content">{{ demo.get('preview').get(attribute) }}</div>
+    </div>
+    {% endfor %}
+</div>

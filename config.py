@@ -1,4 +1,5 @@
 import os
+import time
 from pathlib import Path
 from dotenv import load_dotenv
 from cachelib.file import FileSystemCache
@@ -33,17 +34,18 @@ class Config(object):
     SECRET_KEY = os.getenv('SECRET_KEY')
     
     DEMO = {
-        'name': 'User Onboarding',
-        'version': '1.0',
+        'name': 'Meeting Invitation',
+        'version': '1.1',
         'issuer': 'WebVH AnonCreds Demo',
         'size': 100,
         'preview': {
+            'group': 'OWL',
             'email': 'jane.doe@example.com',
-            'onboarded': '20250106'
+            'date': '20250213'
         },
         'request': {
-            'attributes': ['email'],
-            'predicate': ['onboarded', '>=', 20250101],
+            'attributes': ['group', 'email'],
+            'predicate': ['date', '>=', 20250101],
         }
     }
     
