@@ -2,7 +2,7 @@ import os
 import uuid
 import requests
 from app.services import AskarStorage
-from app.utils import id_to_url, demo_id
+from app.utils import id_to_url, demo_id, url_encode
 from config import Config
 import time
 import pyjokes
@@ -174,13 +174,8 @@ class AgentController:
         
         
     def get_active_registry(self, cred_def_id):
-        r = requests.get(
-            f'{self.endpoint}/anoncreds/revocation/registries',
-            params={
-                'cred_def_id': cred_def_id
-            }
-        )
-        return r.json()['rev_reg_ids'][-1]
+        r = requests.get(f'{self.endpoint}/anoncreds/revocation/active-registry/{url_encode(cred_def_id)}')
+        return r.json()['result']['revoc_reg_id']
         
     def bind_key(self, verification_method, public_key_multibase):
         r = requests.put(
@@ -383,6 +378,11 @@ class AgentController:
             return r.json()
         except:
             raise AgentControllerError('No offer')
+            
+    
+    def get_registry(self, cred_def_id):
+        r = requests.get(f'{self.endpoint}/anoncreds/revocation/active-registry/{cred_def_id}')
+        return r.json()['result']['revoc_reg_id']
             
     
     def get_status_list(self, rev_def_id):

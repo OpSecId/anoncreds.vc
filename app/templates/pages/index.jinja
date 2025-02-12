@@ -105,7 +105,7 @@
                 <div class="text-secondary">
                     {% if session['demo'].get('pres_ex_id') %}
                     {% if session['demo']['presentation'].get('state') == 'done' %}
-                    {% if session['demo']['presentation'].get('verified') == True %}
+                    {% if session['demo']['presentation'].get('verified') == 'true' %}
                     <span class="badge bg-green"></span>
                     {% else %}
                     <span class="badge bg-danger"></span>
@@ -149,13 +149,13 @@
             {% endif %}
             {% if session.get('demo').get('issuance').get('state') == 'done'
             or session.get('demo').get('issuance').get('state') == 'credential-revoked' %}
-            <div class="col-3"><a href="{{ url_for('credential_update') }}"
-                    class="btn btn-sm btn-outline-dark w-100">Revoke</a></div>
             <div class="col-3"><a href="{{ url_for('presentation_request') }}"
                     class="btn btn-sm btn-outline-dark w-100">Request</a></div>
+            <div class="col-3"><a href="{{ url_for('credential_update') }}"
+                    class="btn btn-sm btn-outline-dark w-100">Revoke</a></div>
             {% else %}
-            <div class="col-3"><a class="btn btn-sm btn-outline-dark w-100 disabled">Revoke</a></div>
             <div class="col-3"><a class="btn btn-sm btn-outline-dark w-100 disabled">Request</a></div>
+            <div class="col-3"><a class="btn btn-sm btn-outline-dark w-100 disabled">Revoke</a></div>
             {% endif %}
         </div>
     </div>

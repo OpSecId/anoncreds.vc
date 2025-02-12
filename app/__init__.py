@@ -9,6 +9,7 @@ import uuid
 import time
 from app.services import AskarStorage, AgentController
 from app.utils import id_to_url, demo_id, hash
+from app.operations import sync_demo
 
 
 def create_app(config_class=Config):
@@ -45,28 +46,14 @@ def create_app(config_class=Config):
 
     @app.route("/")
     def index():
-        print(session['client_id'])
         agent = AgentController()
-        session['demo']['issuance'] = {}
-        session['demo']['presentation'] = {}
+        session['demo'] = sync_demo(session['demo'])
         session['connection'] = agent.get_connection(session['client_id'])
-        if session['connection'].get('state') == 'active':
-            session['connection']['hash'] = hash(
-                session['connection'].get('their_label') 
-                or session['connection'].get('connection_id'))
+        session['connection']['hash'] = hash(
+            session['connection'].get('their_label') 
+            or session['connection'].get('connection_id')
+        )
         session['status_list'] = agent.get_status_list(session['demo']['rev_def_id'])
-        if session.get('demo').get('cred_ex_id'):
-            print(session.get('demo').get('cred_ex_id'))
-            offer = agent.verify_offer(session['demo'].get('cred_ex_id'))
-            session['demo']['issuance'] = {
-                'state': offer.get('state')
-            }
-        if session.get('demo').get('pres_ex_id'):
-            presentation = agent.verify_presentation(session['demo'].get('pres_ex_id'))
-            session['demo']['presentation'] = {
-                'state': presentation.get('state'),
-                'verified': True if presentation.get('verified') else False
-            }
         return render_template('pages/index.jinja', demo=session['demo'], status=session['status_list'])
     
     @app.route("/restart")
@@ -93,10 +80,7 @@ def create_app(config_class=Config):
 
     @app.route("/update")
     def credential_update():
-        # try:
         AgentController().revoke_credential(session['demo'].get('cred_ex_id'))
-        # except:
-        #     pass
         return redirect(url_for('index'))
 
     @app.route("/request")

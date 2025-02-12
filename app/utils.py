@@ -1,4 +1,5 @@
 import hashlib
+import urllib.parse
 
 def hash(value):
     return hashlib.md5(value.lower().encode('utf-8')).hexdigest()
@@ -11,3 +12,6 @@ def id_to_url(resource_id):
     namespace = resource_id.split(':')[4]
     identifier = resource_id.split(':')[5]
     return f'https://{domain}/{namespace}/{identifier}'
+
+def url_encode(value):
+    return urllib.parse.quote(value, safe='')
