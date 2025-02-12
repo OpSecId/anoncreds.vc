@@ -47,6 +47,10 @@ def create_app(config_class=Config):
         session['demo']['issuance'] = {}
         session['demo']['presentation'] = {}
         session['connection'] = agent.get_connection(session['client_id'])
+        if session['connection'].get('state') == 'active':
+            session['connection']['hash'] = hash(
+                session['connection'].get('their_label') 
+                or session['connection'].get('connection_id'))
         session['status_list'] = agent.get_status_list(session['demo']['rev_def_id'])
         if session.get('demo').get('cred_ex_id'):
             print(session.get('demo').get('cred_ex_id'))
@@ -86,10 +90,10 @@ def create_app(config_class=Config):
 
     @app.route("/update")
     def credential_update():
-        try:
-            connection = AgentController().get_connection(session.get('client_id'))
-        except:
-            pass
+        # try:
+        AgentController().revoke_credential(session['demo'].get('cred_ex_id'))
+        # except:
+        #     pass
         return redirect(url_for('index'))
 
     @app.route("/request")

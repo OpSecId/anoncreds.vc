@@ -446,14 +446,13 @@ class AgentController:
             endpoint,
             json={
                 'cred_ex_id': cred_ex_id,
-                'notify': True,
                 'publish': publish
             }
         )
         try:
-            return r.json()['results'][0]
+            return r.json()
         except:
-            raise AgentControllerError('No connection')
+            raise AgentControllerError('No revocation')
     
     def send_joke(self, connection_id):
         endpoint = f'{self.endpoint}/connections/{connection_id}/send-message'

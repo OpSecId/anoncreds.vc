@@ -69,10 +69,10 @@
 
                 <div class="">
                     <div class="card-body p-4 py-5 text-center">
-                        <span class="avatar avatar-xl avatar-thumb rounded" style="background-image: url({{ avatars.gravatar(session['client_id']) }})"></span>
+                        <span class="avatar avatar-xl avatar-thumb rounded" style="background-image: url({{ avatars.gravatar(session['connection']['hash']) }})"></span>
                         <h3 class="mb-0">Connected to</h3>
                         <p class="text-secondary">{{session.get('connection').get('their_label')}}</p>
-                        <a href="{{ url_for('send_joke') }}" style="text-decoration: none; font-size:24px">🤣</a>
+                        <a href="{{ url_for('send_joke') }}" class="btn btn-sm">Send Message</a>
                         {# <div>
                             <div class="avatar-list avatar-list-stacked">
                                 <span class="avatar avatar-3 rounded">JL</span>
@@ -189,7 +189,8 @@
             {% else %}
             <div class="col-4"><a class="btn btn-sm btn-outline-dark w-100 disabled">Issue</a></div>
             {% endif %}
-            {% if session.get('demo').get('issuance').get('state') == 'done' %}
+            {% if session.get('demo').get('issuance').get('state') == 'done' 
+            or session.get('demo').get('issuance').get('state') == 'credential-revoked' %}
             <div class="col-4"><a href="{{ url_for('credential_update') }}"
                     class="btn btn-sm btn-outline-dark w-100">Revoke</a></div>
             <div class="col-4"><a href="{{ url_for('presentation_request') }}"
