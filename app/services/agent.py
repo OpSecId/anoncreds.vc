@@ -387,7 +387,7 @@ class AgentController:
     
     def get_status_list(self, rev_def_id):
         r = requests.get(id_to_url(rev_def_id))
-        status_list_id = r.json()['links'][0]['id']
+        status_list_id = r.json()['links'][-1]['id']
         r = requests.get(id_to_url(status_list_id))
         return r.json()['content']['revocationList']
     
