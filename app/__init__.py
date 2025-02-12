@@ -63,12 +63,11 @@ def create_app(config_class=Config):
 
     @app.route("/offer")
     def credential_offer():
-        print('Offer')
         agent = AgentController()
         try:
-            # connection = agent.get_connection(session.get('client_id'))
+            connection = agent.get_connection(session.get('client_id'))
             session['demo']['cred_ex_id'] = agent.send_offer(
-                agent.get_connection(session.get('client_id')),
+                connection.get('connection_id'),
                 session['demo'].get('cred_def_id'),
                 session['demo'].get('preview')
             ).get('cred_ex_id')
@@ -93,9 +92,9 @@ def create_app(config_class=Config):
     def presentation_request():
         agent = AgentController()
         try:
-            # connection = agent.get_connection(session.get('client_id'))
+            connection = agent.get_connection(session.get('client_id'))
             session['demo']['pres_ex_id'] = agent.send_request(
-                agent.get_connection(session.get('client_id')),
+                connection.get('connection_id'),
                 'Demo Presentation',
                 session['demo'].get('cred_def_id'),
                 session['demo'].get('request').get('attributes'),
