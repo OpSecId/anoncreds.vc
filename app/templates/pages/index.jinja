@@ -105,7 +105,7 @@
                 <div class="text-secondary">
                     {% if session['demo'].get('pres_ex_id') %}
                     {% if session['demo']['presentation'].get('state') == 'done' %}
-                    {% if session['demo']['presentation'].get('verified') == 'true' %}
+                    {% if session['demo']['presentation'].get('verified') == True %}
                     <span class="badge bg-green"></span>
                     {% else %}
                     <span class="badge bg-danger"></span>
