@@ -64,42 +64,44 @@ def create_app(config_class=Config):
     @app.route("/offer")
     def credential_offer():
         print('Offer')
+        agent = AgentController()
         try:
-            connection = AgentController().get_connection(session.get('client_id'))
-            print(connection)
-            cred_offer = AgentController().send_offer(
-                connection.get('connection_id'),
+            # connection = agent.get_connection(session.get('client_id'))
+            session['demo']['cred_ex_id'] = agent.send_offer(
+                agent.get_connection(session.get('client_id')),
                 session['demo'].get('cred_def_id'),
                 session['demo'].get('preview')
-            )
-            print(cred_offer)
-            session['demo']['cred_ex_id'] = cred_offer.get('cred_ex_id')
-            session['demo'].pop('pres_ex_id')
-            session['demo']['presentation'] = []
+            ).get('cred_ex_id')
+            session['demo']['presentation'] = {}
+            session['demo'].pop('pres_ex_id', None)
         except:
             pass
         return redirect(url_for('index'))
 
     @app.route("/update")
     def credential_update():
-        AgentController().revoke_credential(session['demo'].get('cred_ex_id'))
-        session['demo'].pop('pres_ex_id')
-        session['demo']['presentation'] = []
+        agent = AgentController()
+        try:
+            AgentController().revoke_credential(session['demo'].get('cred_ex_id'))
+            session['demo']['presentation'] = {}
+            session['demo'].pop('pres_ex_id', None)
+        except:
+            pass
         return redirect(url_for('index'))
 
     @app.route("/request")
     def presentation_request():
+        agent = AgentController()
         try:
-            connection = AgentController().get_connection(session.get('client_id'))
-            pres_req = AgentController().send_request(
-                connection.get('connection_id'),
+            # connection = agent.get_connection(session.get('client_id'))
+            session['demo']['pres_ex_id'] = agent.send_request(
+                agent.get_connection(session.get('client_id')),
                 'Demo Presentation',
                 session['demo'].get('cred_def_id'),
                 session['demo'].get('request').get('attributes'),
                 session['demo'].get('request').get('predicate'),
                 int(time.time())
-            )
-            session['demo']['pres_ex_id'] = pres_req.get('pres_ex_id')
+            ).get('pres_ex_id')
         except:
             pass
         return redirect(url_for('index'))
