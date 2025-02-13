@@ -151,8 +151,16 @@
             or session.get('demo').get('issuance').get('state') == 'credential-revoked' %}
             <div class="col-3"><a href="{{ url_for('presentation_request') }}"
                     class="btn btn-sm btn-outline-dark w-100">Request</a></div>
+            {% if session['demo']['presentation'].get('state') == 'done' %}
+            {% if session['demo']['presentation'].get('verified') == 'true' %}
             <div class="col-3"><a href="{{ url_for('credential_update') }}"
                     class="btn btn-sm btn-outline-dark w-100">Revoke</a></div>
+            {% else %}
+            <div class="col-3"><a class="btn btn-sm btn-outline-dark w-100 disabled">Revoke</a></div>
+            {% endif %}
+            {% else %}
+            <div class="col-3"><a class="btn btn-sm btn-outline-dark w-100 disabled">Revoke</a></div>
+            {% endif %}
             {% else %}
             <div class="col-3"><a class="btn btn-sm btn-outline-dark w-100 disabled">Request</a></div>
             <div class="col-3"><a class="btn btn-sm btn-outline-dark w-100 disabled">Revoke</a></div>

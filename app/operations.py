@@ -1,4 +1,4 @@
-from app.utils import id_to_url
+from app.utils import id_to_url, id_to_resolver_link
 from app.services import AgentController
 
 def sync_demo(demo):
@@ -6,7 +6,7 @@ def sync_demo(demo):
     demo['issuance'] = {}
     demo['presentation'] = {}
     demo['rev_def_id'] = agent.get_active_registry(demo['cred_def_id'])
-    demo['rev_def_url'] = id_to_url(demo['rev_def_id'])
+    demo['rev_def_url'] = id_to_resolver_link(demo['rev_def_id'])
     if demo.get('cred_ex_id'):
         print(demo.get('cred_ex_id'))
         offer = agent.verify_offer(demo.get('cred_ex_id'))
