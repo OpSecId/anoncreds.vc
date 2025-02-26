@@ -11,13 +11,12 @@ class AskarStorage:
     def __init__(self):
         self.db = Config.ASKAR_DB
         self.key = Store.generate_raw_key(
-            hashlib.md5(Config.DOMAIN.encode()).hexdigest()
+            hashlib.md5(Config.SECRET_KEY.encode()).hexdigest()
         )
 
     async def provision(self, recreate=False):
         logger.warning(self.db)
         await Store.provision(self.db, "raw", self.key, recreate=recreate)
-        await self.store('demo', 'default', {})
         
     async def get_wallet_info(self, client_id):
         return await self.fetch(category='wallet', data_key=client_id)
@@ -28,9 +27,6 @@ class AskarStorage:
     async def fetch(self, category, data_key):
         store = await self.open()
         try:
-            current_app.logger.warning('Fetching Data')
-            current_app.logger.warning(category)
-            current_app.logger.warning(data_key)
             async with store.session() as session:
                 entry = await session.fetch(category, data_key)
             return json.loads(entry.value)
@@ -83,10 +79,6 @@ class AskarStorage:
     async def store(self, category, data_key, data, tags=None):
         store = await self.open()
         try:
-            current_app.logger.warning('Storing Data')
-            current_app.logger.warning(category)
-            current_app.logger.warning(data_key)
-            # current_app.logger.warning(data)
             async with store.session() as session:
                 await session.insert(
                     category,
@@ -100,7 +92,6 @@ class AskarStorage:
     async def update(self, category, data_key, data, tags=None):
         store = await self.open()
         try:
-            current_app.logger.warning('Updating Data')
             async with store.session() as session:
                 await session.replace(
                     category,
