@@ -1,17 +1,23 @@
 <script>
-    var interval = 10000;  // 1000 = 1 second
-    function syncState() {
-        $.ajax({
-                type: 'GET',
-                url: '{{ url_for("sync_state")}}',
-                success: function (data) {
-                        console.log(data); 
-                },
-                complete: function (data) {
-                        // Schedule the next
-                        setTimeout(syncState, interval);
-                }
-        });
-    }
-    setTimeout(syncState, interval);
+        var interval = 2000;  // 1000 = 1 second
+        function syncState() {
+                $.ajax({
+                        type: 'GET',
+                        url: '{{ url_for("sync_state")}}',
+                        success: function (data) {
+                                if (data.connection.state === 'active') {
+                                        $('#connection-avatar').html(`<span class="avatar avatar-xl"
+                                        style="background-image: url({{ avatars.gravatar('${data.connection.alias}') }})"></span>`);
+                                        $('#connection-label').html(data.connection.their_label);
+                                } else {}
+                                // $('#registry-state').html(``);
+                                console.log(data);
+                        },
+                        complete: function (data) {
+                                // Schedule the next
+                                setTimeout(syncState, interval);
+                        }
+                });
+        }
+        setTimeout(syncState, interval);
 </script>

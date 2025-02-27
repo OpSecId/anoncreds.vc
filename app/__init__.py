@@ -6,6 +6,8 @@ from flask_avatars import Avatars
 from config import Config
 import asyncio
 import uuid
+import json
+import time
 from app.routes.exchanges import bp as exchanges_bp
 from app.routes.webhooks import bp as webhooks_bp
 from app.services import AskarStorage, AgentController
@@ -16,6 +18,18 @@ from app.operations import provision_demo, sync_connection, sync_demo, update_ch
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
+    
+    @app.template_filter('ctime')
+    def ctime(s):
+        return time.ctime(s)
+    
+    @app.template_filter('dereference')
+    def dereference(s):
+        return id_to_url(s)
+    
+    @app.template_filter('resolve')
+    def id_resolver(s):
+        return id_to_resolver_link(s)
 
     CORS(app)
     QRcode(app)
@@ -42,9 +56,10 @@ def create_app(config_class=Config):
     def index():
         print(session['client_id'])
         agent = AgentController()
+        session["state"] = {}
         session["demo"] = sync_demo(session["demo"])
         session["connection"] = sync_connection(session["client_id"])
-        session["status_list"] = agent.get_status_list(session["demo"]["rev_def_id"])
+        session["status_list"] = agent.get_latest_sl(session["demo"]["cred_def_id"])
         session["demo"]['chat_log'] = update_chat(session["connection"].get("connection_id"))
         return render_template(
             "pages/index.jinja", demo=session["demo"], status=session["status_list"]
@@ -67,18 +82,22 @@ def create_app(config_class=Config):
         cred_ex_id = demo.get('cred_ex_id')
         pres_ex_id = demo.get('pres_ex_id')
         session['state']['connection'] = agent.get_connection(client_id)
+        session['state']['hash'] = hash(
+            session['state']['connection'].get("their_label")
+            or session['state']['connection'].get("connection_id")
+        )
         session['state']['cred_ex'] = agent.verify_offer(cred_ex_id) if cred_ex_id else {}
         session['state']['pres_ex'] = agent.verify_presentation(pres_ex_id) if pres_ex_id else {}
+        session['state']['status_list'] = agent.get_latest_sl(demo.get('cred_def_id'))
+        session['state']['chat_log'] = update_chat(session['state']['connection']["connection_id"])
         print(session['state']['connection'].get('alias'))
+        print(session['state']['connection'].get('their_label'))
         print(session['state']['connection'].get('state'))
         print(session['state']['cred_ex'].get('state'))
         print(session['state']['pres_ex'].get('state'))
-        # chat = update_chat(session["connection"].get("connection_id"))
-        return {
-            'connection': session.get('connection'),
-            'client_id': session.get('client_id'),
-            # 'chat_log': chat
-        }, 200
+        print(session['state']['status_list'])
+        print(session['state']['chat_log'])
+        return session['state'], 200
 
     @app.route("/resource", methods=["GET", "POST"])
     def render_resource():

@@ -45,23 +45,12 @@ class AgentController:
                 'witness': True
             }
         )
-        self.create_did_webvh(self.did_namespace, self.did_identifier)
-        
-        print('Resolving DID')
-        try:
-            print(self.did_web)
-            r = requests.get(
-                f'{self.endpoint}/resolver/resolve/{self.did_web}',
-                # headers=self.headers,
-            )
-            return r.json()['did_document']['alsoKnownAs'][0]
-        except:
-            raise AgentControllerError('Error resolving DID.')
+        return self.create_did_webvh(self.did_namespace, self.did_identifier).get('id')
         
     def create_did_webvh(self, namespace, identifier):
         print('Creating DID')
         try:
-            requests.post(
+            r = requests.post(
                 f'{self.endpoint}/did/webvh/create',
                 # headers=self.headers,
                 json={
@@ -75,6 +64,7 @@ class AgentController:
                     }
                 }
             )
+            return r.json()
         except:
             raise AgentControllerError('Error creating DID.')
         
@@ -380,16 +370,22 @@ class AgentController:
             raise AgentControllerError('No offer')
             
     
+    def get_latest_sl(self, cred_def_id):
+        rev_def_id = self.get_registry(cred_def_id)['result']['revoc_reg_id']
+        status_list = self.get_status_list(rev_def_id)['content']['revocationList']
+        return status_list
+            
+    
     def get_registry(self, cred_def_id):
-        r = requests.get(f'{self.endpoint}/anoncreds/revocation/active-registry/{cred_def_id}')
-        return r.json()['result']['revoc_reg_id']
+        r = requests.get(f'{self.endpoint}/anoncreds/revocation/active-registry/{url_encode(cred_def_id)}')
+        return r.json()
             
     
     def get_status_list(self, rev_def_id):
         r = requests.get(id_to_url(rev_def_id))
         status_list_id = r.json()['links'][-1]['id']
         r = requests.get(id_to_url(status_list_id))
-        return r.json()['content']['revocationList']
+        return r.json()
     
     def send_request(self, connection_id, name, cred_def_id, attributes, predicate, timestamp):
         endpoint = f'{self.endpoint}/present-proof-2.0/send-request'
