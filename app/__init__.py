@@ -6,10 +6,11 @@ from flask_avatars import Avatars
 from config import Config
 import asyncio
 import uuid
-import time
+from app.routes.exchanges import bp as exchanges_bp
+from app.routes.webhooks import bp as webhooks_bp
 from app.services import AskarStorage, AgentController
 from app.utils import id_to_url, demo_id, hash, fetch_resource, id_to_resolver_link
-from app.operations import sync_demo
+from app.operations import provision_demo, sync_connection, sync_demo, update_chat
 
 
 def create_app(config_class=Config):
@@ -20,6 +21,9 @@ def create_app(config_class=Config):
     QRcode(app)
     Session(app)
     Avatars(app)
+    
+    app.register_blueprint(exchanges_bp)
+    app.register_blueprint(webhooks_bp)
 
     @app.before_request
     def before_request_callback():
@@ -30,36 +34,18 @@ def create_app(config_class=Config):
             "endpoint": Config.AGENT_ADMIN_ENDPOINT,
         }
         if "client_id" not in session:
-            session["client_id"] = hash(str(uuid.uuid4()))
-            demo = asyncio.run(AskarStorage().fetch("demo", demo_id(Config.DEMO)))
-            session["demo"] = demo | {
-                "schema_url": id_to_resolver_link(demo["schema_id"]),
-                "cred_def_url": id_to_resolver_link(demo["cred_def_id"]),
-                "rev_def_url": id_to_resolver_link(demo["rev_def_id"]),
-            }
-
-            agent = AgentController()
-            session["invitation"] = agent.create_oob_connection(session["client_id"])
-            oob_id = session["invitation"]["oob_id"]
-            asyncio.run(
-                AskarStorage().store(
-                    "invitation", oob_id, session["invitation"]["invitation"]
-                )
-            )
-            session["invitation"]["short_url"] = (
-                f"{Config.ENDPOINT}/invitation/{oob_id}"
-            )
+            (session["client_id"], 
+             session["invitation"], 
+             session["demo"]) = asyncio.run(provision_demo())
 
     @app.route("/")
     def index():
+        print(session['client_id'])
         agent = AgentController()
         session["demo"] = sync_demo(session["demo"])
-        session["connection"] = agent.get_connection(session["client_id"])
-        session["connection"]["hash"] = hash(
-            session["connection"].get("their_label")
-            or session["connection"].get("connection_id")
-        )
+        session["connection"] = sync_connection(session["client_id"])
         session["status_list"] = agent.get_status_list(session["demo"]["rev_def_id"])
+        session["demo"]['chat_log'] = update_chat(session["connection"].get("connection_id"))
         return render_template(
             "pages/index.jinja", demo=session["demo"], status=session["status_list"]
         )
@@ -69,49 +55,30 @@ def create_app(config_class=Config):
         session.clear()
         return redirect(url_for("index"))
 
-    @app.route("/offer")
-    def credential_offer():
+    @app.route("/sync")
+    def sync_state():
+        if not session.get('client_id'):
+            return {}, 401
         agent = AgentController()
-        try:
-            connection = agent.get_connection(session.get("client_id"))
-            session["demo"]["cred_ex_id"] = agent.send_offer(
-                connection.get("connection_id"),
-                session["demo"].get("cred_def_id"),
-                session["demo"].get("preview"),
-            ).get("cred_ex_id")
-            session["demo"]["presentation"] = {}
-            session["demo"].pop("pres_ex_id", None)
-        except:
-            pass
-        return redirect(url_for("index"))
-
-    @app.route("/update")
-    def credential_update():
-        agent = AgentController()
-        try:
-            AgentController().revoke_credential(session["demo"].get("cred_ex_id"))
-            session["demo"]["presentation"] = {}
-            session["demo"].pop("pres_ex_id", None)
-        except:
-            pass
-        return redirect(url_for("index"))
-
-    @app.route("/request")
-    def presentation_request():
-        agent = AgentController()
-        try:
-            connection = agent.get_connection(session.get("client_id"))
-            session["demo"]["pres_ex_id"] = agent.send_request(
-                connection.get("connection_id"),
-                "Demo Presentation",
-                session["demo"].get("cred_def_id"),
-                session["demo"].get("request").get("attributes"),
-                session["demo"].get("request").get("predicate"),
-                int(time.time()),
-            ).get("pres_ex_id")
-        except:
-            pass
-        return redirect(url_for("index"))
+        demo = session['demo']
+        session['state'] = {}
+        # demo = sync_demo(session["demo"])
+        client_id = session['client_id']
+        cred_ex_id = demo.get('cred_ex_id')
+        pres_ex_id = demo.get('pres_ex_id')
+        session['state']['connection'] = agent.get_connection(client_id)
+        session['state']['cred_ex'] = agent.verify_offer(cred_ex_id) if cred_ex_id else {}
+        session['state']['pres_ex'] = agent.verify_presentation(pres_ex_id) if pres_ex_id else {}
+        print(session['state']['connection'].get('alias'))
+        print(session['state']['connection'].get('state'))
+        print(session['state']['cred_ex'].get('state'))
+        print(session['state']['pres_ex'].get('state'))
+        # chat = update_chat(session["connection"].get("connection_id"))
+        return {
+            'connection': session.get('connection'),
+            'client_id': session.get('client_id'),
+            # 'chat_log': chat
+        }, 200
 
     @app.route("/resource", methods=["GET", "POST"])
     def render_resource():
@@ -122,30 +89,5 @@ def create_app(config_class=Config):
             return render_template("pages/resource.jinja", resource=resource, resource_url=resource_url)
         except:
             return {}, 404
-
-    @app.route("/joke")
-    def send_joke():
-        AgentController().send_joke(session.get("connection").get("connection_id"))
-        return redirect(url_for("index"))
-
-    @app.route("/invitation/<oob_id>")
-    def exchanges(oob_id: str):
-        invitation = asyncio.run(AskarStorage().fetch("invitation", oob_id))
-        if not invitation:
-            return {}, 404
-        return invitation
-
-    # @app.route("/exchanges/<client_id>")
-    # def exchanges(client_id: str):
-    #     invitation = asyncio.run(AskarStorage().fetch('exchanges', client_id))
-    #     if not invitation:
-    #         return {}, 404
-    #     return invitation
-
-    # @app.route("/verify")
-    # def verify_presentation():
-    #     verified = AgentController().verify_presentation(session['pres_ex_id'])
-    #     verified = True if verified.get('verified') else False
-    #     return render_template('pages/verify.jinja', verified=verified)
 
     return app

@@ -1,0 +1,17 @@
+<script>
+    var interval = 10000;  // 1000 = 1 second
+    function syncState() {
+        $.ajax({
+                type: 'GET',
+                url: '{{ url_for("sync_state")}}',
+                success: function (data) {
+                        console.log(data); 
+                },
+                complete: function (data) {
+                        // Schedule the next
+                        setTimeout(syncState, interval);
+                }
+        });
+    }
+    setTimeout(syncState, interval);
+</script>
