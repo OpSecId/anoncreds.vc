@@ -61,6 +61,12 @@
 </div>
 <div class="card-footer">
     <div class="row g-2 align-items-center">
+        <div class="col-3"><a id="btn-message" class="btn btn-sm btn-outline-dark w-100 disabled">Message</a></div>
+        <div class="col-3"><a id="btn-issuance" class="btn btn-sm btn-outline-dark w-100 disabled">Issue</a></div>
+        <div class="col-3"><a id="btn-presentation" class="btn btn-sm btn-outline-dark w-100 disabled">Request</a></div>
+        <div class="col-3"><a id="btn-revocation" class="btn btn-sm btn-outline-dark w-100 disabled">Revoke</a></div>
+    </div>
+    {# <div class="row g-2 align-items-center">
         {% if session.get('connection').get('state') == 'active' %}
         <div class="col-3"><a href="{{ url_for('exchanges.send_joke') }}"
                 class="btn btn-sm btn-outline-dark w-100">Message</a></div>
@@ -88,7 +94,7 @@
         <div class="col-3"><a class="btn btn-sm btn-outline-dark w-100 disabled">Request</a></div>
         <div class="col-3"><a class="btn btn-sm btn-outline-dark w-100 disabled">Revoke</a></div>
         {% endif %}
-    </div>
+    </div> #}
 </div>
 {% include('components/scripts/sync.jinja')%}
 {% endblock %}
