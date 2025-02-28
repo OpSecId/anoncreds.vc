@@ -11,13 +11,15 @@
                                         $('#connection-label').html(data.connection.their_label);
                                         $('#btn-message').removeClass("disabled");
                                         $('#btn-issuance').removeClass("disabled");
+                                        $('#btn-presentation').removeClass("disabled");
                                 } else {}
                                 if (data.cred_ex.state === 'done') {
-                                        $('#btn-presentation').removeClass("disabled");
+                                        $('#issuance-state').html(`<span class="badge bg-green"></span> done`);
                                         $('#btn-revocation').removeClass("disabled");
+                                } else if (data.cred_ex.state === 'abandonned') {
+                                        $('#issuance-state').html(`<span class="badge bg-danger"></span> abandonned`);
                                 } else {
-                                        $('#btn-presentation').addClass("disabled");
-                                        $('#btn-revocation').addClass("disabled");
+                                        $('#issuance-state').html(`<span class="badge bg-warning"></span> pending`);
                                 }
                                 if (data.pres_ex.state === 'done') {
                                 } else {}
