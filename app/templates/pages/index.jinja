@@ -16,7 +16,7 @@
         <div class="col-auto">
             <div id="connection-avatar">
                 <a href="#" data-bs-toggle="modal" data-bs-target="#modal-invitation"><span class="avatar avatar-xl"
-                        style="background-image: url({{ qrcode(session['invitation']['short_url']) }})"></span></a>
+                        style="background-image: url({{ qrcode(demo['invitation']['short_url']) }})"></span></a>
             </div>
         </div>
         <div class="col-auto">
@@ -25,7 +25,7 @@
                 <div class="text-secondary">
                     <ul class="list-inline list-inline-dots mb-0">
                         <li class="list-inline-item">
-                            <a id="btn-message" href="javascript:void(0)" onclick="sendMessage()" class="me-3" hidden>
+                            <a id="btn-message" href="javascript:void(0)" onclick="sendMessage()" class="me-1" hidden>
                                 <span class="text-dark">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -72,17 +72,5 @@
 <div class="card-body">
     {% include('components/credential.jinja') %}
 </div>
-{# <div class="card-footer">
-    <div class="row g-2 align-items-center">
-        <div class="col-3"><a id="btn-message" href="{{ url_for('exchanges.send_joke') }}"
-                class="btn btn-sm btn-outline-dark w-100 disabled">Message</a></div>
-        <div class="col-3"><a id="btn-issuance" href="{{ url_for('exchanges.credential_offer') }}"
-                class="btn btn-sm btn-outline-dark w-100 disabled">Issue</a></div>
-        <div class="col-3"><a id="btn-presentation" href="{{ url_for('exchanges.presentation_request') }}"
-                class="btn btn-sm btn-outline-dark w-100 disabled">Request</a></div>
-        <div class="col-3"><a id="btn-revocation" href="{{ url_for('exchanges.credential_update') }}"
-                class="btn btn-sm btn-outline-dark w-100 disabled">Revoke</a></div>
-    </div>
-</div> #}
 {% include('components/scripts/sync.jinja')%}
 {% endblock %}

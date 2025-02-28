@@ -47,27 +47,18 @@ def create_app(config_class=Config):
             "label": Config.DEMO.get("issuer"),
             "endpoint": Config.AGENT_ADMIN_ENDPOINT,
         }
-        if "client_id" not in session:
-            (session["client_id"], 
-             session["invitation"], 
-             session["demo"]) = asyncio.run(provision_demo())
 
     @app.route("/")
     def index():
-        print(session['client_id'])
-        agent = AgentController()
+        session.clear()
         session["state"] = {}
-        session["demo"] = sync_demo(session["demo"])
-        session["connection"] = sync_connection(session["client_id"])
-        session["status_list"] = agent.get_latest_sl(session["demo"]["cred_def_id"])
-        session["demo"]['chat_log'] = update_chat(session["connection"].get("connection_id"))
+        demo = asyncio.run(provision_demo(session["client_id"]))
         return render_template(
-            "pages/index.jinja", demo=session["demo"], status=session["status_list"]
+            "pages/index.jinja", demo=demo
         )
 
     @app.route("/restart")
     def restart():
-        session.clear()
         return redirect(url_for("index"))
 
     @app.route("/sync")

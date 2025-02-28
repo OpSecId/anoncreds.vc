@@ -4,25 +4,32 @@ import uuid
 from config import Config
 
 async def provision_demo():
-    client_id = hash(str(uuid.uuid4()))
+    instance_id = hash(str(uuid.uuid4()))
     askar = AskarStorage()
     agent = AgentController()
-    invitation = agent.create_oob_connection(client_id)
-    connection = agent.get_connection(client_id)
+    invitation = agent.create_oob_connection(instance_id)
+    connection = agent.get_connection(instance_id)
     connection_id = connection.get('connection_id')
     await askar.store(
             "exchange", connection_id, invitation["invitation"]
         )
-    demo = await askar.fetch("demo", demo_id(Config.DEMO))
-    demo = demo | {
-        "schema_url": id_to_resolver_link(demo["schema_id"]),
-        "cred_def_url": id_to_resolver_link(demo["cred_def_id"]),
-        "rev_def_url": id_to_resolver_link(demo["rev_def_id"]),
-    }
     invitation["short_url"] = (
         f"{Config.ENDPOINT}/exchange/{connection_id}"
     )
-    return client_id, invitation, demo
+    demo = await askar.fetch("demo", demo_id(Config.DEMO))
+    demo = demo | {
+        "status_size": Config.DEMO.get('size'),
+        "invitation": invitation,
+        "instance_id": instance_id,
+        "schema_url": id_to_resolver_link(demo["schema_id"]),
+        "cred_def_url": id_to_resolver_link(demo["cred_def_id"]),
+        "rev_def_url": id_to_resolver_link(demo["rev_def_id"]),
+        "agent": {
+            "label": Config.DEMO.get("issuer"),
+            "endpoint": Config.AGENT_ADMIN_ENDPOINT,
+        }
+    }
+    return demo
 
 def sync_connection(client_id):
     agent = AgentController()
