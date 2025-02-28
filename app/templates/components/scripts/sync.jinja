@@ -9,9 +9,9 @@
                                         $('#connection-avatar').html(`<span class="avatar avatar-xl"
                                         style="background-image: url({{ avatars.gravatar('${data.connection.alias}') }})"></span>`);
                                         $('#connection-label').html(data.connection.their_label);
-                                        $('#btn-message').removeClass("disabled");
-                                        $('#btn-issuance').removeClass("disabled");
-                                        $('#btn-presentation').removeClass("disabled");
+                                        $('#btn-message').css("pointer-events", "auto");
+                                        $('#btn-issuance').css("pointer-events", "auto");
+                                        $('#btn-presentation').css("pointer-events", "auto");
                                 } else {}
                                 if (data.cred_ex.state === null) {
                                         $('#issuance-state').html(`<span class="badge"></span> No Exchange`);
