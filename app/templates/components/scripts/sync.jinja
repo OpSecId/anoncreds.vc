@@ -9,11 +9,9 @@
                                         $('#connection-avatar').html(`<span class="avatar avatar-xl"
                                         style="background-image: url({{ avatars.gravatar('${data.connection.alias}') }})"></span>`);
                                         $('#connection-label').html(data.connection.their_label);
-                                        $('#btn-issuance').css("pointer-events", "auto");
+                                        $('#btn-message').removeAttr("hidden");
                                         $('#btn-issuance').removeAttr("hidden");
-                                        $('#btn-revocation').css("pointer-events", "auto");
                                         $('#btn-revocation').removeAttr("hidden");
-                                        $('#btn-presentation').css("pointer-events", "auto");
                                         $('#btn-presentation').removeAttr("hidden");
                                 } else {}
                                 if (data.cred_ex.state === null) {
