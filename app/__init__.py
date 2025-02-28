@@ -89,6 +89,14 @@ def create_app(config_class=Config):
         session['state']['cred_ex'] = agent.verify_offer(cred_ex_id) if cred_ex_id else {'state': None}
         session['state']['pres_ex'] = agent.verify_presentation(pres_ex_id) if pres_ex_id else {'state': None}
         session['state']['status_list'] = agent.get_latest_sl(demo.get('cred_def_id'))
+        session['state']['status_widget'] = ''
+        for bit in session['state']['status_list']:
+            if bit == 0:
+                session['state']['status_widget'] += '<div class="tracking-block bg-success" data-bs-toggle="tooltip" data-bs-placement="top" title="ok"></div>\n'
+            elif bit == 1:
+                session['state']['status_widget'] += '<div class="tracking-block bg-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="revoked"></div>\n'
+            else:
+                session['state']['status_widget'] += '<div class="tracking-block bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" title="unknown"></div>\n'
         session['state']['chat_log'] = update_chat(session['state']['connection']["connection_id"])
         print(session['state']['connection'].get('alias'))
         print(session['state']['connection'].get('their_label'))
