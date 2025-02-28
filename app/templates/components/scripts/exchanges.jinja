@@ -1,0 +1,60 @@
+
+
+<script>
+    // Get clientId from local storage
+    createOffer() {
+        await fetch("{{ url_for('exchanges.credential_offer') }}")
+    }
+    revokeCredential() {
+        await fetch("{{ url_for('exchanges.credential_update') }}")
+    }
+    requestPresentation() {
+        await fetch("{{ url_for('exchanges.presentation_request') }}")
+    }
+
+    if (clientId) {
+        // If clientId is set, create login request
+        const endpoint = `{{ url_for("auth.login") }}?client_id=${clientId}`
+        $.get(endpoint,
+            function (data, status) {
+                document.getElementById('start-auth').addEventListener('click', async () => {
+                    const asseResp = await startAuthentication({ optionsJSON: data });
+                    const verificationResp = await fetch(endpoint, {
+                        method: 'POST',
+                        body: JSON.stringify(asseResp),
+                    })
+
+                    const verificationJSON = await verificationResp.json();
+
+                    if (verificationJSON && verificationJSON.verified) {
+                        window.location.replace("{{url_for('main.index')}}");
+                    } else {
+                        alert("login failed")
+                        console.error(verificationJSON)
+                    }
+                })
+            });
+    } else {
+        // If no clientId is set, we register a login credential and provision a new wallet.
+        const endpoint = '{{ url_for("auth.register") }}';
+        $.get(endpoint,
+            function (data, status) {
+                document.getElementById('start-auth').addEventListener('click', async () => {
+                    const attResp = await startRegistration({ optionsJSON: data });
+                    const verificationResp = await fetch(endpoint, {
+                        method: 'POST',
+                        body: JSON.stringify(attResp)
+                    });
+                    const verificationJSON = await verificationResp.json();
+
+                    if (verificationJSON && verificationJSON.verified) {
+                        clientId = verificationJSON.client_id;
+                        localStorage.setItem('clientId', clientId);
+                        window.location.replace("{{url_for('main.index')}}");
+                    } else {
+                        alert("Failure");
+                    }
+                });
+            });
+    }
+</script>

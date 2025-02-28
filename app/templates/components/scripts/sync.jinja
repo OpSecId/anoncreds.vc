@@ -17,6 +17,8 @@
                                         $('#issuance-state').html(`<span class="badge"></span> No Exchange`);
                                 } else if (data.cred_ex.state === 'abandonned') {
                                         $('#issuance-state').html(`<span class="badge bg-danger"></span> Abandonned`);
+                                } else if (data.cred_ex.state === 'credential-revoked') {
+                                        $('#issuance-state').html(`<span class="badge bg-warning"></span> Revoked`);
                                 } else if (data.cred_ex.state === 'done') {
                                         $('#issuance-state').html(`<span class="badge bg-green"></span> Completed`);
                                         $('#btn-revocation').removeClass("disabled");
