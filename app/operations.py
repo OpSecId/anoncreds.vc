@@ -20,6 +20,7 @@ async def provision_demo():
     demo = demo | {
         "status_size": Config.DEMO.get('size'),
         "invitation": invitation,
+        "connection": connection,
         "instance_id": instance_id,
         "schema_url": id_to_resolver_link(demo["schema_id"]),
         "cred_def_url": id_to_resolver_link(demo["cred_def_id"]),
