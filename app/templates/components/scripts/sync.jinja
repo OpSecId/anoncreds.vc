@@ -9,7 +9,17 @@
                                         $('#connection-avatar').html(`<span class="avatar avatar-xl"
                                         style="background-image: url({{ avatars.gravatar('${data.connection.alias}') }})"></span>`);
                                         $('#connection-label').html(data.connection.their_label);
+                                        $('#btn-message').removeClass("disabled");
                                         $('#btn-issuance').removeClass("disabled");
+                                } else {}
+                                if (data.cred_ex.state === 'done') {
+                                        $('#btn-presentation').removeClass("disabled");
+                                        $('#btn-revocation').removeClass("disabled");
+                                } else {
+                                        $('#btn-presentation').addClass("disabled");
+                                        $('#btn-revocation').addClass("disabled");
+                                }
+                                if (data.pres_ex.state === 'done') {
                                 } else {}
                                 // $('#registry-state').html(``);
                                 console.log(data);

@@ -86,8 +86,8 @@ def create_app(config_class=Config):
             session['state']['connection'].get("their_label")
             or session['state']['connection'].get("connection_id")
         )
-        session['state']['cred_ex'] = agent.verify_offer(cred_ex_id) if cred_ex_id else {}
-        session['state']['pres_ex'] = agent.verify_presentation(pres_ex_id) if pres_ex_id else {}
+        session['state']['cred_ex'] = agent.verify_offer(cred_ex_id) if cred_ex_id else {'state': None}
+        session['state']['pres_ex'] = agent.verify_presentation(pres_ex_id) if pres_ex_id else {'state': None}
         session['state']['status_list'] = agent.get_latest_sl(demo.get('cred_def_id'))
         session['state']['chat_log'] = update_chat(session['state']['connection']["connection_id"])
         print(session['state']['connection'].get('alias'))
