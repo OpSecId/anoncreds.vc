@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, url_for, current_app, session, redirect, jsonify
 import time
-import asyncio
+from asyncio import run as await_
 from app.services import AgentController, AskarStorage
 
 bp = Blueprint("exchanges", __name__)
@@ -13,7 +13,7 @@ def before_request_callback():
 
 @bp.route("/exchanges/<exchange_id>")
 def exchanges(exchange_id: str):
-    exchange = asyncio.run(AskarStorage().fetch('exchange', exchange_id))
+    exchange = await_(AskarStorage().fetch('exchange', exchange_id))
     if not exchange:
         return {}, 404
     return exchange
