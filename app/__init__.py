@@ -52,7 +52,7 @@ def create_app(config_class=Config):
     def index():
         session.clear()
         session["state"] = {}
-        demo = asyncio.run(provision_demo(session["client_id"]))
+        demo = asyncio.run(provision_demo())
         return render_template(
             "pages/index.jinja", demo=demo
         )
