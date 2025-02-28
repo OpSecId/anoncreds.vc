@@ -62,7 +62,7 @@ def presentation_request():
         pass
     return redirect(url_for("index"))
 
-@bp.route("/joke")
-def send_joke():
+@bp.route("/message")
+def send_message():
     AgentController().send_joke(session.get("connection").get("connection_id"))
     return redirect(url_for("index"))
