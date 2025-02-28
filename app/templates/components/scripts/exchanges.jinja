@@ -1,11 +1,11 @@
 <script>
-    createOffer() {
+    function createOffer() {
         await fetch("{{ url_for('exchanges.credential_offer') }}")
     }
-    revokeCredential() {
+    function revokeCredential() {
         await fetch("{{ url_for('exchanges.credential_update') }}")
     }
-    requestPresentation() {
+    function requestPresentation() {
         await fetch("{{ url_for('exchanges.presentation_request') }}")
     }
 </script>
