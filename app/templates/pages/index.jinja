@@ -68,7 +68,7 @@
                 class="btn btn-sm btn-outline-dark w-100">Issue</a></div>
         {% else %}
         <div class="col-3"><a class="btn btn-sm btn-outline-dark w-100 disabled">Message</a></div>
-        <div class="col-3"><a class="btn btn-sm btn-outline-dark w-100 disabled">Issue</a></div>
+        <div class="col-3"><a id="btn-issuance" class="btn btn-sm btn-outline-dark w-100 disabled">Issue</a></div>
         {% endif %}
         {% if session.get('demo').get('issuance').get('state') == 'done'
         or session.get('demo').get('issuance').get('state') == 'credential-revoked' %}
