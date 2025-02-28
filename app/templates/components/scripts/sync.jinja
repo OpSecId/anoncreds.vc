@@ -10,7 +10,8 @@
                                         style="background-image: url({{ avatars.gravatar('${data.connection.alias}') }})"></span>`);
                                         $('#connection-label').html(data.connection.their_label);
                                         $('#btn-message').removeAttr("hidden");
-                                        $('#exchanges-section').removeAttr("hidden");
+                                        $('#issuance-section').removeAttr("hidden");
+                                        $('#presentation-section').removeAttr("hidden");
                                 } else {}
                                 if (data.cred_ex.state === null) {
                                         $('#issuance-state').html(`<span class="badge"></span> No Exchange`);
