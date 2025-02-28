@@ -4,98 +4,91 @@
 {% include('components/modals/mobiles.jinja') %}
 {% include('components/modals/invitation.jinja') %}
 {% include('components/modals/preview.jinja') %}
-<div class="">
-    <!-- <a href="{{ url_for('index') }}" class="navbar-brand navbar-brand-autodark">
+
+<div class="text-center mb-3">
+    <a href="{{ url_for('index') }}" class="navbar-brand navbar-brand-autodark">
         <img src="https://raw.githubusercontent.com/hyperledger/anoncreds-spec/main/spec/images/logo/hl_anoncreds_colour.svg"
             width="100%" alt="">
-    </a> -->
-
-    <div class="card-body">
-        <!-- <div class="row mb-3">
-            <div class="col-7 me-5"> -->
-        <div class="mb-4">
-            <div class="card-header mb-3">
-                <div class="row align-items-center">
-                    <div class="col-auto">
-                        <div id="connection-avatar">
-                            <a href="#" data-bs-toggle="modal" data-bs-target="#modal-invitation"><span
-                                    class="avatar avatar-xl"
-                                    style="background-image: url({{ qrcode(session['invitation']['short_url']) }})"></span></a>
-                        </div>
-                    </div>
-                    <div class="col-auto">
-                        <div class="card-title">Connection</div>
-                        <div class="card-subtitle">
-                            <div class="text-secondary">
-                                <ul class="list-inline list-inline-dots mb-0">
-                                    <li class="list-inline-item">
-                                        <span class="text-dark"
-                                            id="connection-label">{{session.get('connection').get('state')}}</span>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-actions btn-actions">
-                    <div class="dropdown">
-                        <a href="#" class="btn-action dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true"
-                            aria-expanded="false">
-                            <!-- Download SVG icon from http://tabler.io/icons/icon/dots-vertical -->
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" class="icon icon-1">
-                                <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
-                                <path d="M12 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
-                                <path d="M12 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
-                            </svg>
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-end">
-                            <a class="dropdown-item" href="#" data-bs-toggle="modal"
-                                data-bs-target="#modal-identifiers">AdminAPI</a>
-                            <a class="dropdown-item" href="#" data-bs-toggle="modal"
-                                data-bs-target="#modal-mobiles">Mobile Wallet</a>
-                            <a class="dropdown-item text-danger" href="{{ url_for('restart') }}">Reset</a>
-                        </div>
-                    </div>
+    </a>
+</div>
+<div class="card-header mb-3">
+    <div class="row align-items-center">
+        <div class="col-auto">
+            <div id="connection-avatar">
+                <a href="#" data-bs-toggle="modal" data-bs-target="#modal-invitation"><span class="avatar avatar-xl"
+                        style="background-image: url({{ qrcode(session['invitation']['short_url']) }})"></span></a>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="card-title">Connection</div>
+            <div class="card-subtitle">
+                <div class="text-secondary">
+                    <ul class="list-inline list-inline-dots mb-0">
+                        <li class="list-inline-item">
+                            <span class="text-dark"
+                                id="connection-label">{{session.get('connection').get('state')}}</span>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
-        {% include('components/credential.jinja') %}
-        <!-- </div>
-        </div> -->
     </div>
-    {# <div class="card-footer">
-        <div class="row g-2 align-items-center">
-            {% if session.get('connection').get('state') == 'active' %}
-            <div class="col-3"><a href="{{ url_for('send_joke') }}"
-                    class="btn btn-sm btn-outline-dark w-100">Message</a></div>
-            <div class="col-3"><a href="{{ url_for('credential_offer') }}"
-                    class="btn btn-sm btn-outline-dark w-100">Issue</a></div>
-            {% else %}
-            <div class="col-3"><a class="btn btn-sm btn-outline-dark w-100 disabled">Message</a></div>
-            <div class="col-3"><a class="btn btn-sm btn-outline-dark w-100 disabled">Issue</a></div>
-            {% endif %}
-            {% if session.get('demo').get('issuance').get('state') == 'done'
-            or session.get('demo').get('issuance').get('state') == 'credential-revoked' %}
-            <div class="col-3"><a href="{{ url_for('presentation_request') }}"
-                    class="btn btn-sm btn-outline-dark w-100">Request</a></div>
-            {% if session['demo']['presentation'].get('state') == 'done' %}
-            {% if session['demo']['presentation'].get('verified') == 'true' %}
-            <div class="col-3"><a href="{{ url_for('credential_update') }}"
-                    class="btn btn-sm btn-outline-dark w-100">Revoke</a></div>
-            {% else %}
-            <div class="col-3"><a class="btn btn-sm btn-outline-dark w-100 disabled">Revoke</a></div>
-            {% endif %}
-            {% else %}
-            <div class="col-3"><a class="btn btn-sm btn-outline-dark w-100 disabled">Revoke</a></div>
-            {% endif %}
-            {% else %}
-            <div class="col-3"><a class="btn btn-sm btn-outline-dark w-100 disabled">Request</a></div>
-            <div class="col-3"><a class="btn btn-sm btn-outline-dark w-100 disabled">Revoke</a></div>
-            {% endif %}
+    <div class="card-actions btn-actions">
+        <div class="dropdown">
+            <a href="#" class="btn-action dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true"
+                aria-expanded="false">
+                <!-- Download SVG icon from http://tabler.io/icons/icon/dots-vertical -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="icon icon-1">
+                    <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                    <path d="M12 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                    <path d="M12 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                </svg>
+            </a>
+            <div class="dropdown-menu dropdown-menu-end">
+                <a class="dropdown-item" href="#" data-bs-toggle="modal"
+                    data-bs-target="#modal-identifiers">AdminAPI</a>
+                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modal-mobiles">Mobile
+                    Wallet</a>
+                <a class="dropdown-item text-danger" href="{{ url_for('restart') }}">Reset</a>
+            </div>
         </div>
-    </div> #}
+    </div>
+</div>
+<div class="card-body">
+    {% include('components/credential.jinja') %}
+</div>
+<div class="card-footer">
+    <div class="row g-2 align-items-center">
+        {% if session.get('connection').get('state') == 'active' %}
+        <div class="col-3"><a href="{{ url_for('send_joke') }}"
+                class="btn btn-sm btn-outline-dark w-100">Message</a></div>
+        <div class="col-3"><a href="{{ url_for('credential_offer') }}"
+                class="btn btn-sm btn-outline-dark w-100">Issue</a></div>
+        {% else %}
+        <div class="col-3"><a class="btn btn-sm btn-outline-dark w-100 disabled">Message</a></div>
+        <div class="col-3"><a class="btn btn-sm btn-outline-dark w-100 disabled">Issue</a></div>
+        {% endif %}
+        {% if session.get('demo').get('issuance').get('state') == 'done'
+        or session.get('demo').get('issuance').get('state') == 'credential-revoked' %}
+        <div class="col-3"><a href="{{ url_for('presentation_request') }}"
+                class="btn btn-sm btn-outline-dark w-100">Request</a></div>
+        {% if session['demo']['presentation'].get('state') == 'done' %}
+        {% if session['demo']['presentation'].get('verified') == 'true' %}
+        <div class="col-3"><a href="{{ url_for('credential_update') }}"
+                class="btn btn-sm btn-outline-dark w-100">Revoke</a></div>
+        {% else %}
+        <div class="col-3"><a class="btn btn-sm btn-outline-dark w-100 disabled">Revoke</a></div>
+        {% endif %}
+        {% else %}
+        <div class="col-3"><a class="btn btn-sm btn-outline-dark w-100 disabled">Revoke</a></div>
+        {% endif %}
+        {% else %}
+        <div class="col-3"><a class="btn btn-sm btn-outline-dark w-100 disabled">Request</a></div>
+        <div class="col-3"><a class="btn btn-sm btn-outline-dark w-100 disabled">Revoke</a></div>
+        {% endif %}
+    </div>
 </div>
 {% include('components/scripts/sync.jinja')%}
 {% endblock %}
