@@ -38,7 +38,7 @@ def credential_offer():
 def credential_update():
     agent = AgentController()
     try:
-        AgentController().revoke_credential(session["demo"].get("cred_ex_id"))
+        agent.revoke_credential(session["demo"].get("cred_ex_id"))
         session["demo"]["presentation"] = {}
         session["demo"].pop("pres_ex_id", None)
     except:

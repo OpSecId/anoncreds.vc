@@ -317,7 +317,7 @@ class AgentController:
         endpoint = f'{self.endpoint}/out-of-band/create-invitation?auto_accept=true'
         invitation = {
             "alias": client_id,
-            "my_label": Config.DEMO.get('issuer'),
+            "my_label": self.label,
             "handshake_protocols": ["https://didcomm.org/didexchange/1.0"],
         }
         r = requests.post(

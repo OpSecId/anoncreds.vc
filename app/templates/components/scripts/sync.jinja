@@ -9,6 +9,7 @@
                                         $('#connection-avatar').html(`<span class="avatar avatar-xl"
                                         style="background-image: url({{ avatars.gravatar('${data.connection.alias}') }})"></span>`);
                                         $('#connection-label').html(data.connection.their_label);
+                                        $('#btn-issuance').removeClass("disabled");
                                 } else {}
                                 // $('#registry-state').html(``);
                                 console.log(data);
