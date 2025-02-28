@@ -62,9 +62,9 @@
 <div class="card-footer">
     <div class="row g-2 align-items-center">
         {% if session.get('connection').get('state') == 'active' %}
-        <div class="col-3"><a href="{{ url_for('send_joke') }}"
+        <div class="col-3"><a href="{{ url_for('exchanges.send_joke') }}"
                 class="btn btn-sm btn-outline-dark w-100">Message</a></div>
-        <div class="col-3"><a href="{{ url_for('credential_offer') }}"
+        <div class="col-3"><a href="{{ url_for('exchanges.credential_offer') }}"
                 class="btn btn-sm btn-outline-dark w-100">Issue</a></div>
         {% else %}
         <div class="col-3"><a class="btn btn-sm btn-outline-dark w-100 disabled">Message</a></div>
@@ -72,11 +72,11 @@
         {% endif %}
         {% if session.get('demo').get('issuance').get('state') == 'done'
         or session.get('demo').get('issuance').get('state') == 'credential-revoked' %}
-        <div class="col-3"><a href="{{ url_for('presentation_request') }}"
+        <div class="col-3"><a href="{{ url_for('exchanges.presentation_request') }}"
                 class="btn btn-sm btn-outline-dark w-100">Request</a></div>
         {% if session['demo']['presentation'].get('state') == 'done' %}
         {% if session['demo']['presentation'].get('verified') == 'true' %}
-        <div class="col-3"><a href="{{ url_for('credential_update') }}"
+        <div class="col-3"><a href="{{ url_for('exchanges.credential_update') }}"
                 class="btn btn-sm btn-outline-dark w-100">Revoke</a></div>
         {% else %}
         <div class="col-3"><a class="btn btn-sm btn-outline-dark w-100 disabled">Revoke</a></div>
