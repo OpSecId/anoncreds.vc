@@ -1,11 +1,13 @@
 <script>
     function createOffer() {
         $.get("{{ url_for('exchanges.credential_offer') }}")
+        $('#issuance-state').html(`<span class="badge bg-warning"></span> Pending`);
     }
     function revokeCredential() {
         $.get("{{ url_for('exchanges.credential_update') }}")
     }
     function requestPresentation() {
         $.get("{{ url_for('exchanges.presentation_request') }}")
+        $('#presentation-state').html(`<span class="badge bg-warning"></span> Pending`);
     }
 </script>
