@@ -22,13 +22,13 @@ def exchanges(exchange_id: str):
 def credential_offer():
     agent = AgentController()
     try:
+        session["demo"].pop("pres_ex_id", None)
         connection = agent.get_connection(session.get('demo').get("instance_id"))
         session["demo"]["cred_ex_id"] = agent.send_offer(
             connection.get("connection_id"),
             session["demo"].get("cred_def_id"),
             session["demo"].get("preview"),
         ).get("cred_ex_id")
-        session["demo"].pop("pres_ex_id", None)
     except:
         pass
     return redirect(url_for("index"))
@@ -37,8 +37,8 @@ def credential_offer():
 def credential_update():
     agent = AgentController()
     try:
-        agent.revoke_credential(session["demo"].get("cred_ex_id"))
         session["demo"].pop("pres_ex_id", None)
+        agent.revoke_credential(session["demo"].get("cred_ex_id"))
     except:
         pass
     return redirect(url_for("index"))
