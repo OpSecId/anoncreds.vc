@@ -329,7 +329,17 @@ class AgentController:
         except:
             raise AgentControllerError('No invitation')
     
-    def get_connection(self, client_id):
+    def get_connection(self, connection_id):
+        endpoint = f'{self.endpoint}/connections/{connection_id}'
+        r = requests.get(
+            endpoint
+        )
+        try:
+            return r.json()
+        except:
+            raise AgentControllerError('No connection')
+    
+    def get_connection_from_alias(self, client_id):
         endpoint = f'{self.endpoint}/connections?alias={client_id}'
         r = requests.get(
             endpoint
@@ -451,11 +461,11 @@ class AgentController:
         except:
             raise AgentControllerError('No revocation')
     
-    def send_joke(self, connection_id):
+    def send_message(self, connection_id, message=None):
         endpoint = f'{self.endpoint}/connections/{connection_id}/send-message'
         requests.post(
             endpoint,
             json={
-                'content': pyjokes.get_joke()
+                'content': message or pyjokes.get_joke()
             }
         )

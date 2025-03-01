@@ -8,7 +8,7 @@
                                 $('#registry-state').html(data.status_widget)
                                 if (data.connection.state === 'active') {
                                         $('#connection-avatar').html(`<span class="avatar avatar-xl"
-                                        style="background-image: url({{ avatars.gravatar('${data.connection.alias}') }})"></span>`);
+                                        style="background-image: url({{ avatars.gravatar('${data.connection.hash}') }})"></span>`);
                                         $('#connection-label').html(data.connection.their_label);
                                         $('#btn-message').removeAttr("hidden");
                                         $('#btn-issuance').removeAttr("hidden");
@@ -16,6 +16,7 @@
                                         $('#btn-presentation').removeAttr("hidden");
                                 } else {}
                                 if (data.cred_ex.state === null) {
+                                        $('#issuance-state').html(`No Exchange`);
                                 } else if (data.cred_ex.state === 'deleted') {
                                         $('#issuance-state').html(`Exchange Deleted`);
                                 } else if (data.cred_ex.state === 'abandonned') {
@@ -33,6 +34,7 @@
                                         `);
                                 }
                                 if (data.pres_ex.state === null) {
+                                        $('#presentation-state').html(`No Exchange`);
                                 } else if (data.pres_ex.state === 'deleted') {
                                         $('#presentation-state').html(`Exchange Deleted`);
                                 } else if (data.cred_ex.state === 'abandonned') {

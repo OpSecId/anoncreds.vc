@@ -4,7 +4,7 @@ from flask_qrcode import QRcode
 from flask_session import Session
 from flask_avatars import Avatars
 from config import Config
-import asyncio
+from asyncio import run as await_
 import uuid
 import json
 import time
@@ -36,6 +36,8 @@ def create_app(config_class=Config):
     Session(app)
     Avatars(app)
     
+    askar = AskarStorage()
+    
     app.register_blueprint(exchanges_bp)
     app.register_blueprint(webhooks_bp)
 
@@ -47,9 +49,13 @@ def create_app(config_class=Config):
             "label": Config.DEMO.get("issuer"),
             "endpoint": Config.AGENT_ADMIN_ENDPOINT,
         }
-        if not session.get('demo'):
+        if not session.get('connection_id'):
             session.clear()
-            session["demo"] = asyncio.run(provision_demo())
+            session["demo"] = demo = await_(provision_demo())
+            session["connection_id"] = demo['connection']['connection_id']
+            await_(askar.store('demo', session["connection_id"], demo))
+            await_(askar.store('cred_ex_id', session['connection_id'], None))
+            await_(askar.store('pres_ex_id', session['connection_id'], None))
 
     @app.route("/")
     def index():
