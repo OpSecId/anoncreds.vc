@@ -67,8 +67,6 @@ async def sync_demo(connection_id):
 
 async def sync_demo_state(connection_id):
     demo = await askar.fetch('demo', connection_id)
-    cred_ex_id = await askar.fetch('cred_ex_id', connection_id)
-    pres_ex_id = await askar.fetch('pres_ex_id', connection_id)
     
     state = {}
     state['connection'] = agent.get_connection(connection_id)
@@ -77,6 +75,8 @@ async def sync_demo_state(connection_id):
         or connection_id
     )
     
+    cred_ex_id = await askar.fetch('cred_ex_id', connection_id)
+    pres_ex_id = await askar.fetch('pres_ex_id', connection_id)
     if cred_ex_id is None:
         state['cred_ex'] = {'state': None}
     elif cred_ex_id == 'deleted':
@@ -92,14 +92,16 @@ async def sync_demo_state(connection_id):
         state['pres_ex'] = agent.verify_presentation(pres_ex_id)
         
     status_list = agent.get_latest_sl(demo.get('cred_def_id'))
-    state['status_widget'] = ''
+    state['status_widget'] = {
+        'html': ''
+    }
     for bit in status_list:
         if bit == 0:
-            state['status_widget'] += '<div class="tracking-block bg-success" data-bs-toggle="tooltip" data-bs-placement="top" title="ok"></div>\n'
+            state['status_widget']['html'] += '<div class="tracking-block bg-success" data-bs-toggle="tooltip" data-bs-placement="top" title="ok"></div>\n'
         elif bit == 1:
-            state['status_widget'] += '<div class="tracking-block bg-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="revoked"></div>\n'
+            state['status_widget']['html'] += '<div class="tracking-block bg-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="revoked"></div>\n'
         else:
-            state['status_widget'] += '<div class="tracking-block bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" title="unknown"></div>\n'
+            state['status_widget']['html'] += '<div class="tracking-block bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" title="unknown"></div>\n'
     return state
 
 def update_chat(connection_id):

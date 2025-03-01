@@ -24,8 +24,9 @@ def exchanges(exchange_id: str):
 @bp.route("/offer")
 def credential_offer():
     connection_id = session.get('connection_id')
-    demo = await_(askar.fetch('demo', connection_id))
     await_(askar.update('pres_ex_id', connection_id, 'deleted'))
+    await_(askar.update('cred_ex_id', connection_id, None))
+    demo = await_(askar.fetch('demo', connection_id))
     try:
         session['cred_ex_id'] = agent.send_offer(
             session["connection_id"],
@@ -51,6 +52,7 @@ def credential_update():
 @bp.route("/request")
 def presentation_request():
     connection_id = session.get('connection_id')
+    await_(askar.update('pres_ex_id', connection_id, None))
     demo = await_(askar.fetch('demo', connection_id))
     try:
         session['pres_ex_id'] = agent.send_request(
