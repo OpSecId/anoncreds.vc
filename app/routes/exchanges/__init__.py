@@ -22,7 +22,7 @@ def exchanges(exchange_id: str):
 def credential_offer():
     agent = AgentController()
     try:
-        connection = agent.get_connection(session.get("client_id"))
+        connection = agent.get_connection(session.get('demo').get("instance_id"))
         session["demo"]["cred_ex_id"] = agent.send_offer(
             connection.get("connection_id"),
             session["demo"].get("cred_def_id"),
@@ -49,7 +49,7 @@ def credential_update():
 def presentation_request():
     agent = AgentController()
     try:
-        connection = agent.get_connection(session.get("client_id"))
+        connection = agent.get_connection(session.get('demo').get("client_id"))
         session["demo"]["pres_ex_id"] = agent.send_request(
             connection.get("connection_id"),
             "Demo Presentation",
@@ -64,5 +64,5 @@ def presentation_request():
 
 @bp.route("/message")
 def send_message():
-    AgentController().send_joke(session.get("connection").get("connection_id"))
+    AgentController().send_joke(session.get("demo").get("connection").get("connection_id"))
     return redirect(url_for("index"))
