@@ -8,7 +8,7 @@ bp = Blueprint("exchanges", __name__)
 
 @bp.before_request
 def before_request_callback():
-    if "client_id" not in session:
+    if "demo" not in session:
         return {}, 401
 
 @bp.route("/exchanges/<exchange_id>")
