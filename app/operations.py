@@ -9,7 +9,7 @@ askar = AskarStorage()
 async def provision_demo():
     instance_id = hash(str(uuid.uuid4()))
     invitation = agent.create_oob_connection(instance_id)
-    connection = agent.get_connection(instance_id)
+    connection = agent.get_connection_from_alias(instance_id)
     connection_id = connection.get('connection_id')
     invitation["short_url"] = (
         f"{Config.ENDPOINT}/exchange/{connection_id}"
