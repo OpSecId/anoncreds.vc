@@ -1,4 +1,4 @@
-from flask import Flask, render_template, session, redirect, url_for, request
+from flask import Flask, current_app, render_template, session, redirect, url_for, request
 from flask_cors import CORS
 from flask_qrcode import QRcode
 from flask_session import Session
@@ -70,7 +70,9 @@ def create_app(config_class=Config):
     def sync_state():
         if not session.get('connection_id'):
             return {}, 400
-        return await_(sync_demo_state(session.get('connection_id'))), 200
+        state = await_(sync_demo_state(session.get('connection_id')))
+        current_app.logger.warning(state)
+        return state, 200
 
     @app.route("/resource", methods=["GET", "POST"])
     def render_resource():
