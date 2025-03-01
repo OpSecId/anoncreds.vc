@@ -72,8 +72,14 @@ def sync_demo_state(demo):
         state['connection'].get("their_label")
         or state['connection'].get("connection_id")
     )
-    state['cred_ex'] = agent.verify_offer(cred_ex_id) if cred_ex_id else {'state': None}
-    state['pres_ex'] = agent.verify_presentation(pres_ex_id) if pres_ex_id else {'state': None}
+    if cred_ex_id == 'deleted':
+        state['cred_ex'] = {'state': 'deleted'}
+    else:
+        state['cred_ex'] = agent.verify_offer(cred_ex_id) if cred_ex_id else {'state': None}
+    if pres_ex_id == 'deleted':
+        state['pres_ex'] = {'state': 'deleted'}
+    else:
+        state['pres_ex'] = agent.verify_presentation(pres_ex_id) if pres_ex_id else {'state': None}
     state['status_list'] = agent.get_latest_sl(demo.get('cred_def_id'))
     state['status_widget'] = ''
     for bit in state['status_list']:

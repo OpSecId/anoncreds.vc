@@ -16,6 +16,8 @@
                                         $('#btn-presentation').removeAttr("hidden");
                                 } else {}
                                 if (data.cred_ex.state === null) {
+                                } else if (data.cred_ex.state === 'deleted') {
+                                        $('#issuance-state').html(`Exchange Deleted`);
                                 } else if (data.cred_ex.state === 'abandonned') {
                                         $('#issuance-state').html(`<span class="badge bg-danger"></span> Abandonned`);
                                 } else if (data.cred_ex.state === 'credential-revoked') {
@@ -31,6 +33,8 @@
                                         `);
                                 }
                                 if (data.pres_ex.state === null) {
+                                } else if (data.pres_ex.state === 'deleted') {
+                                        $('#presentation-state').html(`Exchange Deleted`);
                                 } else if (data.cred_ex.state === 'abandonned') {
                                         $('#presentation-state').html(`<span class="badge bg-danger"></span> Abandonned`);
                                 } else if (data.pres_ex.state === 'done') {

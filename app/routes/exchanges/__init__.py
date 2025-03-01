@@ -22,7 +22,7 @@ def exchanges(exchange_id: str):
 def credential_offer():
     agent = AgentController()
     try:
-        session["demo"].pop("pres_ex_id", None)
+        session["demo"]["pres_ex_id"] = 'deleted'
         connection = agent.get_connection(session.get('demo').get("instance_id"))
         session["demo"]["cred_ex_id"] = agent.send_offer(
             connection.get("connection_id"),
@@ -37,7 +37,7 @@ def credential_offer():
 def credential_update():
     agent = AgentController()
     try:
-        session["demo"].pop("pres_ex_id", None)
+        session["demo"]["pres_ex_id"] = 'deleted'
         agent.revoke_credential(session["demo"].get("cred_ex_id"))
     except:
         pass
