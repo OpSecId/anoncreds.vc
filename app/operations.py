@@ -61,6 +61,30 @@ def sync_demo(demo):
         }
     return demo
 
+def sync_demo_state(demo):
+    agent = AgentController()
+    state = {}
+    instance_id = demo['instance_id']
+    cred_ex_id = demo.get('cred_ex_id')
+    pres_ex_id = demo.get('pres_ex_id')
+    state['connection'] = agent.get_connection(instance_id)
+    state['hash'] = hash(
+        state['connection'].get("their_label")
+        or state['connection'].get("connection_id")
+    )
+    state['cred_ex'] = agent.verify_offer(cred_ex_id) if cred_ex_id else {'state': None}
+    state['pres_ex'] = agent.verify_presentation(pres_ex_id) if pres_ex_id else {'state': None}
+    state['status_list'] = agent.get_latest_sl(demo.get('cred_def_id'))
+    state['status_widget'] = ''
+    for bit in state['status_list']:
+        if bit == 0:
+            state['status_widget'] += '<div class="tracking-block bg-success" data-bs-toggle="tooltip" data-bs-placement="top" title="ok"></div>\n'
+        elif bit == 1:
+            state['status_widget'] += '<div class="tracking-block bg-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="revoked"></div>\n'
+        else:
+            state['status_widget'] += '<div class="tracking-block bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" title="unknown"></div>\n'
+    return state
+
 def update_chat(connection_id):
     chat_log = []
     # chat_log.append({

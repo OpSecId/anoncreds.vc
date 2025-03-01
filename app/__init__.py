@@ -12,7 +12,7 @@ from app.routes.exchanges import bp as exchanges_bp
 from app.routes.webhooks import bp as webhooks_bp
 from app.services import AskarStorage, AgentController
 from app.utils import id_to_url, demo_id, hash, fetch_resource, id_to_resolver_link
-from app.operations import provision_demo, sync_connection, sync_demo, update_chat
+from app.operations import provision_demo, sync_connection, sync_demo, update_chat, sync_demo_state
 
 
 def create_app(config_class=Config):
@@ -52,10 +52,7 @@ def create_app(config_class=Config):
 
     @app.route("/")
     def index():
-        session["state"] = {}
-        return render_template(
-            "pages/index.jinja", demo=session["demo"]
-        )
+        return render_template("pages/index.jinja")
 
     @app.route("/restart")
     def restart():
@@ -66,29 +63,7 @@ def create_app(config_class=Config):
     def sync_state():
         if not session.get('demo'):
             return {}, 400
-        agent = AgentController()
-        demo = session['demo']
-        session['state'] = {}
-        instance_id = demo['instance_id']
-        cred_ex_id = demo.get('cred_ex_id')
-        pres_ex_id = demo.get('pres_ex_id')
-        session['state']['connection'] = agent.get_connection(instance_id)
-        session['state']['hash'] = hash(
-            session['state']['connection'].get("their_label")
-            or session['state']['connection'].get("connection_id")
-        )
-        session['state']['cred_ex'] = agent.verify_offer(cred_ex_id) if cred_ex_id else {'state': None}
-        session['state']['pres_ex'] = agent.verify_presentation(pres_ex_id) if pres_ex_id else {'state': None}
-        session['state']['status_list'] = agent.get_latest_sl(demo.get('cred_def_id'))
-        session['state']['status_widget'] = ''
-        for bit in session['state']['status_list']:
-            if bit == 0:
-                session['state']['status_widget'] += '<div class="tracking-block bg-success" data-bs-toggle="tooltip" data-bs-placement="top" title="ok"></div>\n'
-            elif bit == 1:
-                session['state']['status_widget'] += '<div class="tracking-block bg-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="revoked"></div>\n'
-            else:
-                session['state']['status_widget'] += '<div class="tracking-block bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" title="unknown"></div>\n'
-        return session['state'], 200
+        return sync_demo_state(session.get('demo')), 200
 
     @app.route("/resource", methods=["GET", "POST"])
     def render_resource():
