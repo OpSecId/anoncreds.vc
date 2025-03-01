@@ -48,6 +48,7 @@ def create_app(config_class=Config):
             "endpoint": Config.AGENT_ADMIN_ENDPOINT,
         }
         if not session.get('demo'):
+            session.clear()
             session["demo"] = asyncio.run(provision_demo())
 
     @app.route("/")

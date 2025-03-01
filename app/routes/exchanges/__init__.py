@@ -28,7 +28,6 @@ def credential_offer():
             session["demo"].get("cred_def_id"),
             session["demo"].get("preview"),
         ).get("cred_ex_id")
-        session["demo"]["presentation"] = {}
         session["demo"].pop("pres_ex_id", None)
     except:
         pass
@@ -39,7 +38,6 @@ def credential_update():
     agent = AgentController()
     try:
         agent.revoke_credential(session["demo"].get("cred_ex_id"))
-        session["demo"]["presentation"] = {}
         session["demo"].pop("pres_ex_id", None)
     except:
         pass
@@ -49,7 +47,7 @@ def credential_update():
 def presentation_request():
     agent = AgentController()
     try:
-        connection = agent.get_connection(session.get('demo').get("client_id"))
+        connection = agent.get_connection(session.get('demo').get("instance_id"))
         session["demo"]["pres_ex_id"] = agent.send_request(
             connection.get("connection_id"),
             "Demo Presentation",
