@@ -47,11 +47,12 @@ def create_app(config_class=Config):
             "label": Config.DEMO.get("issuer"),
             "endpoint": Config.AGENT_ADMIN_ENDPOINT,
         }
+        if not session.get('demo'):
+            session["demo"] = asyncio.run(provision_demo())
 
     @app.route("/")
     def index():
         session["state"] = {}
-        session["demo"] = asyncio.run(provision_demo())
         return render_template(
             "pages/index.jinja", demo=session["demo"]
         )
