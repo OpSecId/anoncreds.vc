@@ -20,9 +20,9 @@ def exchanges(exchange_id: str):
 
 @bp.route("/offer")
 def credential_offer():
+    session["demo"]["pres_ex_id"] = 'deleted'
     agent = AgentController()
     try:
-        session["demo"]["pres_ex_id"] = 'deleted'
         connection = agent.get_connection(session.get('demo').get("instance_id"))
         session["demo"]["cred_ex_id"] = agent.send_offer(
             connection.get("connection_id"),
@@ -35,9 +35,9 @@ def credential_offer():
 
 @bp.route("/update")
 def credential_update():
+    session["demo"]["pres_ex_id"] = 'deleted'
     agent = AgentController()
     try:
-        session["demo"]["pres_ex_id"] = 'deleted'
         agent.revoke_credential(session["demo"].get("cred_ex_id"))
     except:
         pass
