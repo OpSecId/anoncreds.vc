@@ -11,11 +11,12 @@
                                         style="background-image: url({{ avatars.gravatar('${data.connection.alias}') }})"></span>`);
                                         $('#connection-label').html(data.connection.their_label);
                                         $('#btn-message').removeAttr("hidden");
-                                        $('#issuance-section').removeAttr("hidden");
-                                        $('#presentation-section').removeAttr("hidden");
+                                        $('#btn-issuance').removeAttr("hidden");
+                                        $('#btn-revocation').removeAttr("hidden");
+                                        $('#btn-presentation').removeAttr("hidden");
                                 } else {}
                                 if (data.cred_ex.state === null) {
-                                        $('#issuance-state').html(`<span class="badge"></span> No Exchange`);
+                                        $('#issuance-state').html(`No Exchange`);
                                 } else if (data.cred_ex.state === 'abandonned') {
                                         $('#issuance-state').html(`<span class="badge bg-danger"></span> Abandonned`);
                                 } else if (data.cred_ex.state === 'credential-revoked') {
@@ -24,10 +25,14 @@
                                         $('#issuance-state').html(`<span class="badge bg-green"></span> Completed`);
                                         $('#btn-revocation').removeClass("disabled");
                                 } else {
-                                        $('#issuance-state').html(`<span class="badge bg-warning"></span> Pending`);
+                                        $('#issuance-state').html(`
+                                        <div class="progress progress-sm">
+                                                <div class="progress-bar progress-bar-indeterminate"></div>
+                                        </div>
+                                        `);
                                 }
                                 if (data.pres_ex.state === null) {
-                                        $('#presentation-state').html(`<span class="badge"></span> No Exchange`);
+                                        $('#presentation-state').html(`No Exchange`);
                                 } else if (data.cred_ex.state === 'abandonned') {
                                         $('#presentation-state').html(`<span class="badge bg-danger"></span> Abandonned`);
                                 } else if (data.pres_ex.state === 'done') {
@@ -39,7 +44,11 @@
                                                 $('#presentation-state').html(`<span class="badge bg-danger"></span> Problem`);
                                         }
                                 } else {
-                                        $('#presentation-state').html(`<span class="badge bg-warning"></span> Pending`);
+                                        $('#presentation-state').html(`
+                                        <div class="progress progress-sm">
+                                                <div class="progress-bar progress-bar-indeterminate"></div>
+                                        </div>
+                                        `);
                                 }
                                 // $('#registry-state').html(``);
                                 console.log(data);
