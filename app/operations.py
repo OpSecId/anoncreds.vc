@@ -85,9 +85,9 @@ async def sync_demo_state(connection_id):
         state['cred_ex'] = agent.verify_offer(cred_ex_id)
 
     if pres_ex_id is None:
-        state['pres_ex_id'] = {'state': None}
+        state['pres_ex'] = {'state': None}
     elif pres_ex_id == 'deleted':
-        state['pres_ex_id'] = {'state': 'deleted'}
+        state['pres_ex'] = {'state': 'deleted'}
     else:
         state['pres_ex'] = agent.verify_presentation(pres_ex_id)
         

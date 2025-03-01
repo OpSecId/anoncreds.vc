@@ -71,7 +71,7 @@ def create_app(config_class=Config):
         if not session.get('connection_id'):
             return {}, 400
         state = await_(sync_demo_state(session.get('connection_id')))
-        current_app.logger.warning(state)
+        # current_app.logger.warning(state)
         return state, 200
 
     @app.route("/resource", methods=["GET", "POST"])
