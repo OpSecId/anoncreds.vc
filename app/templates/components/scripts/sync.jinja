@@ -16,7 +16,6 @@
                                         $('#btn-presentation').removeAttr("hidden");
                                 } else {}
                                 if (data.cred_ex.state === null) {
-                                        $('#issuance-state').html(`No Exchange`);
                                 } else if (data.cred_ex.state === 'deleted') {
                                         $('#issuance-state').html(`Exchange Deleted`);
                                 } else if (data.cred_ex.state === 'abandonned') {
@@ -34,7 +33,6 @@
                                         `);
                                 }
                                 if (data.pres_ex.state === null) {
-                                        $('#presentation-state').html(`No Exchange`);
                                 } else if (data.pres_ex.state === 'deleted') {
                                         $('#presentation-state').html(`Exchange Deleted`);
                                 } else if (data.cred_ex.state === 'abandonned') {
