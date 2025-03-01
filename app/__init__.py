@@ -52,9 +52,9 @@ def create_app(config_class=Config):
     def index():
         session.clear()
         session["state"] = {}
-        demo = asyncio.run(provision_demo())
+        session["demo"] = asyncio.run(provision_demo())
         return render_template(
-            "pages/index.jinja", demo=demo
+            "pages/index.jinja", demo=session["demo"]
         )
 
     @app.route("/restart")
@@ -63,16 +63,15 @@ def create_app(config_class=Config):
 
     @app.route("/sync")
     def sync_state():
-        if not session.get('client_id'):
-            return {}, 401
+        if not session.get('demo'):
+            return {}, 400
         agent = AgentController()
         demo = session['demo']
         session['state'] = {}
-        # demo = sync_demo(session["demo"])
-        client_id = session['client_id']
+        instance_id = demo['instance_id']
         cred_ex_id = demo.get('cred_ex_id')
         pres_ex_id = demo.get('pres_ex_id')
-        session['state']['connection'] = agent.get_connection(client_id)
+        session['state']['connection'] = agent.get_connection(instance_id)
         session['state']['hash'] = hash(
             session['state']['connection'].get("their_label")
             or session['state']['connection'].get("connection_id")
@@ -88,14 +87,6 @@ def create_app(config_class=Config):
                 session['state']['status_widget'] += '<div class="tracking-block bg-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="revoked"></div>\n'
             else:
                 session['state']['status_widget'] += '<div class="tracking-block bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" title="unknown"></div>\n'
-        session['state']['chat_log'] = update_chat(session['state']['connection']["connection_id"])
-        print(session['state']['connection'].get('alias'))
-        print(session['state']['connection'].get('their_label'))
-        print(session['state']['connection'].get('state'))
-        print(session['state']['cred_ex'].get('state'))
-        print(session['state']['pres_ex'].get('state'))
-        print(session['state']['status_list'])
-        print(session['state']['chat_log'])
         return session['state'], 200
 
     @app.route("/resource", methods=["GET", "POST"])
