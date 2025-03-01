@@ -50,7 +50,6 @@ def create_app(config_class=Config):
 
     @app.route("/")
     def index():
-        session.clear()
         session["state"] = {}
         session["demo"] = asyncio.run(provision_demo())
         return render_template(
@@ -59,6 +58,7 @@ def create_app(config_class=Config):
 
     @app.route("/restart")
     def restart():
+        session.clear()
         return redirect(url_for("index"))
 
     @app.route("/sync")
