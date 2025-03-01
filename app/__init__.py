@@ -70,7 +70,7 @@ def create_app(config_class=Config):
     def sync_state():
         if not session.get('demo'):
             return {}, 400
-        return sync_demo_state(session.get('demo')), 200
+        return await_(sync_demo_state(session.get('demo')), 200)
 
     @app.route("/resource", methods=["GET", "POST"])
     def render_resource():
