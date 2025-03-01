@@ -2,7 +2,7 @@
     function createOffer() {
         $.get("{{ url_for('exchanges.credential_offer') }}")
         $('#issuance-state').html(`
-        <div class="progress progress-sm mt-2">
+        <div class="progress progress-sm mt-3">
                 <div class="progress-bar progress-bar-indeterminate"></div>
         </div>
         `);
@@ -14,7 +14,7 @@
     function requestPresentation() {
         $.get("{{ url_for('exchanges.presentation_request') }}")
         $('#presentation-state').html(`
-        <div class="progress progress-sm mt-2">
+        <div class="progress progress-sm mt-3">
                 <div class="progress-bar progress-bar-indeterminate"></div>
         </div>
         `);
