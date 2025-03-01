@@ -68,9 +68,9 @@ def create_app(config_class=Config):
 
     @app.route("/sync")
     def sync_state():
-        if not session.get('demo'):
+        if not session.get('connection_id'):
             return {}, 400
-        return await_(sync_demo_state(session.get('demo'))), 200
+        return await_(sync_demo_state(session.get('connection_id'))), 200
 
     @app.route("/resource", methods=["GET", "POST"])
     def render_resource():
