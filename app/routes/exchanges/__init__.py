@@ -14,7 +14,7 @@ def before_request_callback():
     if "connection_id" not in session:
         return {}, 401
 
-@bp.route("/exchanges/<exchange_id>")
+@bp.route("/exchanges")
 def exchanges(exchange_id: str):
     exchange = await_(AskarStorage().fetch('exchange', exchange_id))
     if not exchange:

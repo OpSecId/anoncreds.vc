@@ -12,7 +12,7 @@ async def provision_demo():
     connection = agent.get_connection_from_alias(instance_id)
     connection_id = connection.get('connection_id')
     invitation["short_url"] = (
-        f"{Config.ENDPOINT}/exchange/{connection_id}"
+        f"{Config.ENDPOINT}/exchange?_oobid={connection_id}"
     )
     
     await askar.store(
