@@ -15,8 +15,8 @@ def before_request_callback():
         return {}, 401
 
 @bp.route("/exchanges")
-def exchanges(exchange_id: str):
-    exchange = await_(AskarStorage().fetch('exchange', exchange_id))
+def exchanges(_oobid: str):
+    exchange = await_(AskarStorage().fetch('exchange', _oobid))
     if not exchange:
         return {}, 404
     return exchange
