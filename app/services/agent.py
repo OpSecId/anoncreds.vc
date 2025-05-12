@@ -51,7 +51,7 @@ class AgentController:
         print('Creating DID')
         try:
             r = requests.post(
-                f'{self.endpoint}/did/webvh/create',
+                f'{self.endpoint}/did/webvh/controller/create',
                 # headers=self.headers,
                 json={
                     'options': {
@@ -64,6 +64,7 @@ class AgentController:
                     }
                 }
             )
+            print(r.text)
             return r.json()
         except:
             raise AgentControllerError('Error creating DID.')
