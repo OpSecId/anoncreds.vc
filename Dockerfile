@@ -14,4 +14,5 @@ RUN poetry install
 COPY app ./app
 COPY config.py main.py ./
 
-CMD [ "python", "main.py" ]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "app:app"]
+# CMD [ "python", "main.py" ]
