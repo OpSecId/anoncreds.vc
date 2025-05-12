@@ -34,18 +34,17 @@ class Config(object):
     SECRET_KEY = os.getenv('SECRET_KEY')
     
     DEMO = {
-        'name': 'Meeting Invitation',
-        'version': '1.1',
-        'issuer': 'WebVH AnonCreds Demo',
+        'name': 'Workshop Attendance',
+        'version': '1.0',
+        'issuer': 'WebVH AnonCreds Issuer',
         'size': 100,
         'preview': {
-            'group': 'OWL',
-            'email': 'jane.doe@example.com',
-            'date': '20250213'
+            'workshopName': 'PyDentity Wallet',
+            'workshopDate': '20250512'
         },
         'request': {
-            'attributes': ['group', 'email'],
-            'predicate': ['date', '>=', 20250101],
+            'attributes': ['workshopName'],
+            'predicate': ['workshopDate', '>=', 20250512],
         }
     }
     
