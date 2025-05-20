@@ -30,6 +30,7 @@ preserve-exchange-records: true
 plugin:
   - webvh
   # - oid4vc
+  - status_list.v1_0
   - connection_update.v1_0
   # - basicmessage_storage.v1_0
   # - multitenant_provider.v1_0
