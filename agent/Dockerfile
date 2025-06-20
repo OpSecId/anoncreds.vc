@@ -11,6 +11,7 @@ RUN pip install git+https://github.com/openwallet-foundation/acapy-plugins@1.3.0
 RUN pip install git+https://github.com/openwallet-foundation/acapy-plugins@1.3.0#subdirectory=basicmessage_storage
 RUN pip install git+https://github.com/openwallet-foundation/acapy-plugins@1.3.0#subdirectory=multitenant_provider
 
+
 USER $user
 COPY ./configs.yml configs.yml
 

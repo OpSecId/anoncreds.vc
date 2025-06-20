@@ -37,6 +37,3 @@ plugin:
 
 plugin-config-value:
   - did-webvh.server_url=https://id.anoncreds.vc
-  - status_list.list_size=200000
-  - status_list.shard_size=4
-  - status_list.base_url=https://status.test-suite.app
