@@ -59,6 +59,7 @@ def create_app(config_class=Config):
 
     @app.route("/")
     def index():
+        session["endpoint"] = Config.ENDPOINT
         return render_template("pages/index.jinja")
 
     @app.route("/restart")

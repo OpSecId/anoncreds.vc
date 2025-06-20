@@ -25,7 +25,7 @@ class Config(object):
     SESSION_COOKIE_SAMESITE = 'Strict'
     SESSION_COOKIE_HTTPONLY = 'True'
     
-    # AGENT_ADMIN_API_KEY = os.getenv('AGENT_ADMIN_API_KEY')
+    AGENT_ADMIN_API_KEY = os.getenv('AGENT_ADMIN_API_KEY')
     AGENT_ADMIN_ENDPOINT = os.getenv('AGENT_ADMIN_ENDPOINT')
     
     DIDWEBVH_SERVER = os.getenv('DIDWEBVH_SERVER', None)
@@ -34,17 +34,21 @@ class Config(object):
     SECRET_KEY = os.getenv('SECRET_KEY')
     
     DEMO = {
-        'name': 'Workshop Attendance',
-        'version': '1.0',
-        'issuer': 'WebVH AnonCreds Issuer',
+        'name': 'Person',
+        'version': '1.3',
+        'issuer': {
+            'id': os.getenv('ISSUER_ID', None),
+            'name': 'AnonCreds WebVH Demo'
+        },
         'size': 100,
         'preview': {
-            'workshopName': 'PyDentity Wallet',
-            'workshopDate': '20250512'
+            'givenName': 'Jane',
+            'familyName': 'Doe',
+            'dateOfBirth': '19910101'
         },
         'request': {
-            'attributes': ['workshopName'],
-            'predicate': ['workshopDate', '>=', 20250512],
+            'attributes': ['familyName'],
+            'predicate': ['dateOfBirth', '<=', 19991231],
         }
     }
     

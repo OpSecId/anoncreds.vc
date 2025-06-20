@@ -19,6 +19,7 @@ async def provision_demo():
             "exchange", connection_id, invitation["invitation"]
         )
     demo = await askar.fetch("demo", demo_id(Config.DEMO))
+    demo["rev_def_id"] = agent.get_active_registry(demo["cred_def_id"])
     demo = demo | {
         "status_size": Config.DEMO.get('size'),
         "invitation": invitation,

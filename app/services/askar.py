@@ -10,19 +10,16 @@ logger = logging.getLogger(__name__)
 class AskarStorage:
     def __init__(self):
         self.db = Config.ASKAR_DB
-        self.key = Store.generate_raw_key(
-            hashlib.md5(Config.SECRET_KEY.encode()).hexdigest()
-        )
 
     async def provision(self, recreate=False):
-        logger.warning(self.db)
-        await Store.provision(self.db, "raw", self.key, recreate=recreate)
+        logger.info(self.db)
+        await Store.provision(self.db, "none", recreate=recreate)
         
     async def get_wallet_info(self, client_id):
         return await self.fetch(category='wallet', data_key=client_id)
 
     async def open(self):
-        return await Store.open(self.db, "raw", self.key)
+        return await Store.open(self.db, "none")
 
     async def fetch(self, category, data_key):
         store = await self.open()
