@@ -35,7 +35,7 @@ class Config(object):
     
     DEMO = {
         'name': 'Person',
-        'version': '1.3',
+        'version': os.getenv('SCHEMA_VERSION', '1.0'),
         'issuer': {
             'id': os.getenv('ISSUER_ID', None),
             'name': 'AnonCreds WebVH Demo'
