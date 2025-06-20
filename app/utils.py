@@ -1,6 +1,7 @@
 import hashlib
 import requests
 import urllib.parse
+import asyncio
 from config import Config
 
 def hash(value):

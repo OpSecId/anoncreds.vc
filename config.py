@@ -25,27 +25,31 @@ class Config(object):
     SESSION_COOKIE_SAMESITE = 'Strict'
     SESSION_COOKIE_HTTPONLY = 'True'
     
-    # AGENT_ADMIN_API_KEY = os.getenv('AGENT_ADMIN_API_KEY')
+    AGENT_ADMIN_API_KEY = os.getenv('AGENT_ADMIN_API_KEY')
     AGENT_ADMIN_ENDPOINT = os.getenv('AGENT_ADMIN_ENDPOINT')
     
     DIDWEBVH_SERVER = os.getenv('DIDWEBVH_SERVER', None)
     DIDWEBVH_WITNESS_KEY = os.getenv('DIDWEBVH_WITNESS_KEY', None)
+    DIDWEBVH_WITNESS_INVITATION = os.getenv('DIDWEBVH_WITNESS_INVITATION', None)
     
     SECRET_KEY = os.getenv('SECRET_KEY')
     
     DEMO = {
-        'name': 'Meeting Invitation',
-        'version': '1.1',
-        'issuer': 'WebVH AnonCreds Demo',
+        'name': 'Person',
+        'version': os.getenv('SCHEMA_VERSION', '1.0'),
+        'issuer': {
+            'id': os.getenv('ISSUER_ID', None),
+            'name': 'AnonCreds WebVH Demo'
+        },
         'size': 100,
         'preview': {
-            'group': 'OWL',
-            'email': 'jane.doe@example.com',
-            'date': '20250213'
+            'givenName': 'Jane',
+            'familyName': 'Doe',
+            'dateOfBirth': '19910101'
         },
         'request': {
-            'attributes': ['group', 'email'],
-            'predicate': ['date', '>=', 20250101],
+            'attributes': ['familyName'],
+            'predicate': ['dateOfBirth', '<=', 19991231],
         }
     }
     

@@ -7,6 +7,7 @@ from config import Config
 import time
 import pyjokes
 from random import randint
+from time import sleep
 
 
 class AgentControllerError(Exception):
@@ -14,7 +15,11 @@ class AgentControllerError(Exception):
 
 class AgentController:
     def __init__(self):
-        self.label = Config.DEMO.get('issuer')
+        self.demo = Config.DEMO
+        self.demo_id = demo_id(self.demo)
+        self.issuer_id = self.demo.get('issuer').get('id')
+        self.issuer_name = self.demo.get('issuer').get('name')
+        
         self.webvh_server = os.getenv('DIDWEBVH_SERVER')
         self.did_domain = self.webvh_server.split("://")[-1]
         self.did_namespace = "demo"
@@ -22,48 +27,33 @@ class AgentController:
         self.did_web = f'did:web:{self.did_domain}:{self.did_namespace}:{self.did_identifier}'
         self.witness_key = os.getenv('DIDWEBVH_WITNESS_KEY')
         self.endpoint = os.getenv('AGENT_ADMIN_ENDPOINT')
-        # self.headers = {
-        #     'X-API-KEY': os.getenv('AGENT_ADMIN_API_KEY')
-        # }
+        self.headers = {
+            'X-API-KEY': os.getenv('AGENT_ADMIN_API_KEY')
+        }
         
     async def provision(self):
-        demo = await AskarStorage().fetch('demo', demo_id(Config.DEMO))
-        if not demo:
-            await AskarStorage().store(
-                'demo',
-                demo_id(Config.DEMO),
-                Config.DEMO | self.setup_demo()
-            )
+        askar = AskarStorage()
+        if not await askar.fetch('demo', self.demo_id):
+            await askar.store('demo', self.demo_id, self.setup_demo(self.demo))
         
     def configure_did_webvh(self):
         requests.post(
             f'{self.endpoint}/did/webvh/configuration',
-            # headers=self.headers,
+            headers=self.headers,
             json={
                 'server_url': self.webvh_server,
                 'witness_key': self.witness_key,
                 'witness': True
             }
         )
-        self.create_did_webvh(self.did_namespace, self.did_identifier)
-        
-        print('Resolving DID')
-        try:
-            print(self.did_web)
-            r = requests.get(
-                f'{self.endpoint}/resolver/resolve/{self.did_web}',
-                # headers=self.headers,
-            )
-            return r.json()['did_document']['alsoKnownAs'][0]
-        except:
-            raise AgentControllerError('Error resolving DID.')
+        return self.create_did_webvh(self.did_namespace, self.did_identifier).get('id')
         
     def create_did_webvh(self, namespace, identifier):
         print('Creating DID')
         try:
-            requests.post(
-                f'{self.endpoint}/did/webvh/create',
-                # headers=self.headers,
+            r = requests.post(
+                f'{self.endpoint}/did/webvh/controller/create',
+                headers=self.headers,
                 json={
                     'options': {
                         'identifier': identifier,
@@ -75,6 +65,8 @@ class AgentController:
                     }
                 }
             )
+            print(r.text)
+            return r.json()
         except:
             raise AgentControllerError('Error creating DID.')
         
@@ -83,7 +75,7 @@ class AgentController:
         try:
             r = requests.post(
                 f'{self.endpoint}/anoncreds/schema',
-                # headers=self.headers,
+                headers=self.headers,
                 json={
                     'options': {},
                     'schema': schema
@@ -98,7 +90,7 @@ class AgentController:
         try:
             r = requests.post(
                 f'{self.endpoint}/anoncreds/credential-definition',
-                # headers=self.headers,
+                headers=self.headers,
                 json={
                     'options': {
                         'support_revocation': True if rev_size > 0 else False, 
@@ -115,7 +107,7 @@ class AgentController:
         try:
             r = requests.post(
                 f'{self.endpoint}/anoncreds/revocation-registry-definition',
-                # headers=self.headers,
+                headers=self.headers,
                 json={
                     'options': {},
                     'revocation_registry_definition': rev_def
@@ -128,58 +120,62 @@ class AgentController:
     def create_rev_list(self, rev_def_id:str):
         r = requests.post(
             f'{self.endpoint}/anoncreds/revocation-list',
-            # headers=self.headers,
+            headers=self.headers,
             json={
                 'options': {},
                 'rev_reg_def_id': rev_def_id
             }
         )
         
-    def setup_demo(self):
+    def setup_demo(self, demo):
         print('Setting up AnonCreds Demo')
-        issuer_id = self.configure_did_webvh()
         schema_id = self.create_schema(
             {
-                'issuerId': issuer_id,
-                'name': Config.DEMO.get('name'),
-                'version': Config.DEMO.get('version'),
-                'attrNames':[attribute for attribute in Config.DEMO.get('preview')],
+                'issuerId': self.issuer_id,
+                'name': demo.get('name'),
+                'version': demo.get('version'),
+                'attrNames':[attribute for attribute in demo.get('preview')],
             }
         )
         cred_def_id = self.create_cred_def(
             {
-                'issuerId': issuer_id,
+                'issuerId': self.issuer_id,
                 'schemaId': schema_id,
-                'tag': Config.DEMO.get('name'),
+                'tag': demo.get('name'),
             },
-            Config.DEMO.get('size')
+            demo.get('size')
         )
-        rev_def_id = self.get_active_registry(cred_def_id)
+        # sleep(2)
+        # rev_def_id = self.get_active_registry(cred_def_id)
         # rev_def_id = self.create_rev_def(
         #     {
         #         'credDefId': cred_def_id,
         #         'issuerId': issuer,
-        #         'maxCredNum': Config.DEMO.get('size'),
+        #         'maxCredNum': self.demo.get('size'),
         #         'tag': '0'
         #     }
         # )
         # self.create_rev_list(rev_def_id)
-        return {
-            'issuer_id': issuer_id,
+        return demo | {
+            'issuer_id': self.issuer_id,
             'schema_id': schema_id,
             'cred_def_id': cred_def_id,
-            'rev_def_id': rev_def_id,
+            # 'rev_def_id': rev_def_id,
         }
         
         
         
     def get_active_registry(self, cred_def_id):
-        r = requests.get(f'{self.endpoint}/anoncreds/revocation/active-registry/{url_encode(cred_def_id)}')
+        r = requests.get(
+            f'{self.endpoint}/anoncreds/revocation/active-registry/{url_encode(cred_def_id)}',
+            headers=self.headers
+        )
         return r.json()['result']['revoc_reg_id']
         
     def bind_key(self, verification_method, public_key_multibase):
         r = requests.put(
             f'{self.endpoint}/wallet/keys',
+            headers=self.headers,
             json={
                 'kid': verification_method,
                 'multikey': public_key_multibase
@@ -217,7 +213,7 @@ class AgentController:
         }
         r = requests.post(
             endpoint,
-            # headers=self.headers,
+            headers=self.headers,
             json=cred_offer
         )
         print(r.text)
@@ -242,7 +238,7 @@ class AgentController:
             'presentation_request': {
                 'anoncreds': {
                     'name': name,
-                    'version': Config.DEMO.get('version'),
+                    'version': self.demo.get('version'),
                     'nonce': str(randint(1, 99999999)),
                     'requested_attributes': {
                         'requestedAttributes': {
@@ -260,7 +256,7 @@ class AgentController:
         }
         r = requests.post(
             endpoint,
-            # headers=self.headers,
+            headers=self.headers,
             json=pres_req
         )
         try:
@@ -271,7 +267,7 @@ class AgentController:
     def create_oob_inv(self, alias=None, cred_ex_id=None, pres_ex_id=None, handshake=False):
         endpoint = f'{self.endpoint}/out-of-band/create-invitation?auto_accept=true'
         invitation = {
-            "my_label": self.label,
+            "my_label": self.issuer_name,
             "attachments": [],
             "handshake_protocols": [],
         }
@@ -292,7 +288,7 @@ class AgentController:
             )
         r = requests.post(
             endpoint,
-            # headers=self.headers,
+            headers=self.headers,
             json=invitation
         )
         try:
@@ -304,7 +300,7 @@ class AgentController:
         endpoint = f'{self.endpoint}/present-proof-2.0/records/{pres_ex_id}'
         r = requests.get(
             endpoint,
-            # headers=self.headers
+            headers=self.headers
         )
         try:
             return r.json()
@@ -315,7 +311,7 @@ class AgentController:
         endpoint = f'{self.endpoint}/issue-credential-2.0/records/{cred_ex_id}'
         r = requests.get(
             endpoint,
-            # headers=self.headers
+            headers=self.headers
         )
         try:
             return r.json().get('cred_ex_record')
@@ -324,14 +320,15 @@ class AgentController:
 
     
     def create_oob_connection(self, client_id):
-        endpoint = f'{self.endpoint}/out-of-band/create-invitation?auto_accept=true'
+        endpoint = f'{self.endpoint}/out-of-band/create-invitation'
         invitation = {
             "alias": client_id,
-            "my_label": Config.DEMO.get('issuer'),
-            "handshake_protocols": ["https://didcomm.org/didexchange/1.0"],
+            "my_label": self.issuer_name,
+            "handshake_protocols": ["https://didcomm.org/didexchange/1.1"],
         }
         r = requests.post(
             endpoint,
+            headers=self.headers,
             json=invitation
         )
         try:
@@ -339,10 +336,22 @@ class AgentController:
         except:
             raise AgentControllerError('No invitation')
     
-    def get_connection(self, client_id):
+    def get_connection(self, connection_id):
+        endpoint = f'{self.endpoint}/connections/{connection_id}'
+        r = requests.get(
+            endpoint,
+            headers=self.headers,
+        )
+        try:
+            return r.json()
+        except:
+            raise AgentControllerError('No connection')
+    
+    def get_connection_from_alias(self, client_id):
         endpoint = f'{self.endpoint}/connections?alias={client_id}'
         r = requests.get(
-            endpoint
+            endpoint,
+            headers=self.headers,
         )
         try:
             return r.json()['results'][0]
@@ -371,6 +380,7 @@ class AgentController:
         }
         r = requests.post(
             endpoint,
+            headers=self.headers,
             json=cred_offer
         )
         # print(r.text)
@@ -380,16 +390,25 @@ class AgentController:
             raise AgentControllerError('No offer')
             
     
+    def get_latest_sl(self, cred_def_id):
+        rev_def_id = self.get_registry(cred_def_id)['result']['revoc_reg_id']
+        status_list = self.get_status_list(rev_def_id)['content']['revocationList']
+        return status_list
+            
+    
     def get_registry(self, cred_def_id):
-        r = requests.get(f'{self.endpoint}/anoncreds/revocation/active-registry/{cred_def_id}')
-        return r.json()['result']['revoc_reg_id']
+        r = requests.get(
+            f'{self.endpoint}/anoncreds/revocation/active-registry/{url_encode(cred_def_id)}',
+            headers=self.headers
+        )
+        return r.json()
             
     
     def get_status_list(self, rev_def_id):
-        r = requests.get(id_to_url(rev_def_id))
+        r = requests.get(id_to_url(rev_def_id), headers=self.headers)
         status_list_id = r.json()['links'][-1]['id']
-        r = requests.get(id_to_url(status_list_id))
-        return r.json()['content']['revocationList']
+        r = requests.get(id_to_url(status_list_id), headers=self.headers)
+        return r.json()
     
     def send_request(self, connection_id, name, cred_def_id, attributes, predicate, timestamp):
         endpoint = f'{self.endpoint}/present-proof-2.0/send-request'
@@ -400,7 +419,7 @@ class AgentController:
             'presentation_request': {
                 'anoncreds': {
                     'name': name,
-                    'version': Config.DEMO.get('version'),
+                    'version': self.demo.get('version'),
                     'nonce': str(randint(1, 99999999)),
                     'requested_attributes': {
                         'requestedAttributes': {
@@ -433,6 +452,7 @@ class AgentController:
         }
         r = requests.post(
             endpoint,
+            headers=self.headers,
             json=pres_req
         )
         print(r.text)
@@ -445,6 +465,7 @@ class AgentController:
         endpoint = f'{self.endpoint}/anoncreds/revocation/revoke'
         r = requests.post(
             endpoint,
+            headers=self.headers,
             json={
                 'cred_ex_id': cred_ex_id,
                 'publish': publish
@@ -455,11 +476,12 @@ class AgentController:
         except:
             raise AgentControllerError('No revocation')
     
-    def send_joke(self, connection_id):
+    def send_message(self, connection_id, message=None):
         endpoint = f'{self.endpoint}/connections/{connection_id}/send-message'
         requests.post(
             endpoint,
+            headers=self.headers,
             json={
-                'content': pyjokes.get_joke()
+                'content': message or pyjokes.get_joke()
             }
         )

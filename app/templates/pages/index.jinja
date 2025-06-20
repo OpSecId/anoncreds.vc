@@ -1,171 +1,76 @@
 {% extends('layouts/base.jinja') %}
 {% block page %}
 {% include('components/modals/identifiers.jinja') %}
+{% include('components/modals/mobiles.jinja') %}
 {% include('components/modals/invitation.jinja') %}
 {% include('components/modals/preview.jinja') %}
-<div class="card">
 
-    <div class="card-header">
-        <div>
-            <div class="row align-items-center">
-                <div class="col-auto">
-                    {% if session.get('connection').get('state') == 'active' %}
-                    <span class="avatar avatar-xl"
-                        style="background-image: url({{ avatars.gravatar(session['connection']['hash']) }})"></span>
-                    {% else %}
-                    <a href="#" data-bs-toggle="modal" data-bs-target="#modal-invitation"><span class="avatar avatar-xl"
-                            style="background-image: url({{ qrcode(session['invitation']['short_url']) }})"></span></a>
-                    {% endif %}
-                </div>
-                <div class="col">
-                    <div class="card-title">Connection</div>
-
-                    <div class="card-subtitle">
-                        <div class="text-secondary">
-                            <ul class="list-inline list-inline-dots mb-0">
-                                <li class="list-inline-item">
-                                    {% if session.get('connection').get('state') == 'active' %}
-                                    <span class="text-dark">{{session.get('connection').get('their_label')}}</span>
-                                    {% else %}
-                                    <span class="text-dark">{{session.get('connection').get('state')}}</span>
-                                    {% endif %}
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+<div class="text-center mb-3">
+    <a href="{{ url_for('index') }}" class="navbar-brand navbar-brand-autodark">
+        <img src="https://raw.githubusercontent.com/hyperledger/anoncreds-spec/main/spec/images/logo/hl_anoncreds_colour.svg"
+            width="100%" alt="">
+    </a>
+</div>
+<div class="card-header mb-3">
+    <div class="row align-items-center">
+        <div class="col-auto">
+            <div id="connection-avatar">
+                <a href="#" data-bs-toggle="modal" data-bs-target="#modal-invitation"><span class="avatar avatar-xl"
+                        style="background-image: url({{ qrcode(session['demo']['invitation']['short_url']) }})"></span></a>
             </div>
         </div>
-        <div class="card-actions btn-actions">
-            <a class="btn-action" href="{{ url_for('index') }}"><svg xmlns="http://www.w3.org/2000/svg" width="24"
-                    height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round"
-                    class="icon icon-tabler icons-tabler-outline icon-tabler-refresh">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                    <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" />
-                    <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" />
-                </svg></a>
-            <div class="dropdown">
-                <a href="#" class="btn-action dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true"
-                    aria-expanded="false">
-                    <!-- Download SVG icon from http://tabler.io/icons/icon/dots-vertical -->
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="icon icon-1">
-                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
-                        <path d="M12 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
-                        <path d="M12 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
-                    </svg>
-                </a>
-                <div class="dropdown-menu dropdown-menu-end">
-                    <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modal-identifiers">Admin
-                        API</a>
-                    <a class="dropdown-item text-danger" href="{{ url_for('restart') }}">Reset</a>
+        <div class="col-auto">
+            <div class="card-title">Connection</div>
+            <div class="card-subtitle">
+                <div class="text-secondary">
+                    <ul class="list-inline list-inline-dots mb-0">
+                        <li class="list-inline-item">
+                            <a id="btn-message" href="javascript:void(0)" onclick="sendMessage()" hidden>
+                                <span class="text-dark">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        class="icon icon-tabler icons-tabler-outline icon-tabler-message-circle-plus">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                        <path
+                                            d="M12.007 19.98a9.869 9.869 0 0 1 -4.307 -.98l-4.7 1l1.3 -3.9c-2.324 -3.437 -1.426 -7.872 2.1 -10.374c3.526 -2.501 8.59 -2.296 11.845 .48c1.992 1.7 2.93 4.04 2.747 6.34" />
+                                        <path d="M16 19h6" />
+                                        <path d="M19 16v6" />
+                                    </svg>
+                                </span>
+                            </a>
+                            <span class="text-dark ms-1" id="connection-label">No Connection</span>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
-    <div class="card-body">
-        <div class="row mb-3">
-            <div class="col-6">
-                <h3 class="card-title">
-                    <div class="text-reset">Credential</div>
-                    <div class="text-secondary">
-                        <ul class="list-inline list-inline-dots">
-                            <li class="list-inline-item"><a target="_blank"
-                                    href="{{session['demo'].get('schema_url')}}">Schema</a></li>
-                            <li class="list-inline-item"><a target="_blank"
-                                    href="{{session['demo'].get('cred_def_url')}}">Definition</a></li>
-                            <li class="list-inline-item"><a target="_blank"
-                                    href="{{session['demo'].get('rev_def_url')}}">Registry</a></li>
-                            <li class="list-inline-item"><a href="#" data-bs-toggle="modal"
-                                    data-bs-target="#modal-preview">Preview</a></li>
-                        </ul>
-                    </div>
-                </h3>
+    <div class="card-actions btn-actions">
+        <div class="dropdown">
+            <a href="#" class="btn-action dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true"
+                aria-expanded="false">
+                <!-- Download SVG icon from http://tabler.io/icons/icon/dots-vertical -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="icon icon-1">
+                    <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                    <path d="M12 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                    <path d="M12 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                </svg>
+            </a>
+            <div class="dropdown-menu dropdown-menu-end">
+                <a class="dropdown-item" href="#" data-bs-toggle="modal"
+                    data-bs-target="#modal-identifiers">AdminAPI</a>
+                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modal-mobiles">Mobile
+                    Wallet</a>
+                <a class="dropdown-item text-danger" href="{{ url_for('restart') }}">Reset</a>
             </div>
-            <div class="col-3">
-                <h4 class="text-reset">Issuance</h4>
-                <div class="text-secondary">
-                    {% if session['demo'].get('cred_ex_id') %}
-                    {% if session['demo']['issuance'].get('state') == 'done' %}
-                    <span class="badge bg-green"></span>
-                    {% elif session['demo']['issuance'].get('state') == 'abandonned' %}
-                    <span class="badge bg-danger"></span>
-                    {% else %}
-                    <span class="badge bg-warning"></span>
-                    {% endif %}
-                    {% else %}
-                    {% endif %}
-                    {{session['demo']['issuance'].get('state') }}
-                </div>
-            </div>
-            <div class="col-3">
-                <h4 class="text-reset">Presentation</h4>
-                <div class="text-secondary">
-                    {% if session['demo'].get('pres_ex_id') %}
-                    {% if session['demo']['presentation'].get('state') == 'done' %}
-                    {% if session['demo']['presentation'].get('verified') == 'true' %}
-                    <span class="badge bg-green"></span>
-                    {% else %}
-                    <span class="badge bg-danger"></span>
-                    {% endif %}
-                    {% elif session['demo']['presentation'].get('state') == 'abandonned' %}
-                    <span class="badge bg-danger"></span>
-                    {% else %}
-                    <span class="badge bg-warning"></span>
-                    {% endif %}
-                    {% else %}
-                    {% endif %}
-                    {{session['demo']['presentation'].get('state') }}
-                </div>
-            </div>
-        </div>
-        <div class="tracking mb-3">
-            {% for entry in status %}
-            {% if entry == 0 %}
-            <div class="tracking-block bg-success" data-bs-toggle="tooltip" data-bs-placement="top" title="ok">
-            </div>
-            {% elif entry == 1 %}
-            <div class="tracking-block bg-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="revoked">
-            </div>
-            {% else %}
-            <div class="tracking-block bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" title="unknown">
-            </div>
-            {% endif %}
-            {% endfor %}
-        </div>
-    </div>
-    <div class="card-footer">
-        <div class="row g-2 align-items-center">
-            {% if session.get('connection').get('state') == 'active' %}
-            <div class="col-3"><a href="{{ url_for('send_joke') }}"
-                    class="btn btn-sm btn-outline-dark w-100">Message</a></div>
-            <div class="col-3"><a href="{{ url_for('credential_offer') }}"
-                    class="btn btn-sm btn-outline-dark w-100">Issue</a></div>
-            {% else %}
-            <div class="col-3"><a class="btn btn-sm btn-outline-dark w-100 disabled">Message</a></div>
-            <div class="col-3"><a class="btn btn-sm btn-outline-dark w-100 disabled">Issue</a></div>
-            {% endif %}
-            {% if session.get('demo').get('issuance').get('state') == 'done'
-            or session.get('demo').get('issuance').get('state') == 'credential-revoked' %}
-            <div class="col-3"><a href="{{ url_for('presentation_request') }}"
-                    class="btn btn-sm btn-outline-dark w-100">Request</a></div>
-            {% if session['demo']['presentation'].get('state') == 'done' %}
-            {% if session['demo']['presentation'].get('verified') == 'true' %}
-            <div class="col-3"><a href="{{ url_for('credential_update') }}"
-                    class="btn btn-sm btn-outline-dark w-100">Revoke</a></div>
-            {% else %}
-            <div class="col-3"><a class="btn btn-sm btn-outline-dark w-100 disabled">Revoke</a></div>
-            {% endif %}
-            {% else %}
-            <div class="col-3"><a class="btn btn-sm btn-outline-dark w-100 disabled">Revoke</a></div>
-            {% endif %}
-            {% else %}
-            <div class="col-3"><a class="btn btn-sm btn-outline-dark w-100 disabled">Request</a></div>
-            <div class="col-3"><a class="btn btn-sm btn-outline-dark w-100 disabled">Revoke</a></div>
-            {% endif %}
         </div>
     </div>
 </div>
+<div class="card-body">
+    {% include('components/credential.jinja') %}
+</div>
+{% include('components/scripts/sync.jinja')%}
 {% endblock %}
