@@ -2,8 +2,8 @@ from app import create_app
 from app.services import AskarStorage, AgentController
 import asyncio
 
-asyncio.run(AskarStorage().provision(recreate=False))
-asyncio.run(AgentController().provision())
+# asyncio.run(AskarStorage().provision(recreate=False))
+# asyncio.run(AgentController().provision())
 
 app = create_app()
 

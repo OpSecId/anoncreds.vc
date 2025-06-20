@@ -30,6 +30,7 @@ class Config(object):
     
     DIDWEBVH_SERVER = os.getenv('DIDWEBVH_SERVER', None)
     DIDWEBVH_WITNESS_KEY = os.getenv('DIDWEBVH_WITNESS_KEY', None)
+    DIDWEBVH_WITNESS_INVITATION = os.getenv('DIDWEBVH_WITNESS_INVITATION', None)
     
     SECRET_KEY = os.getenv('SECRET_KEY')
     

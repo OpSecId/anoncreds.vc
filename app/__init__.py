@@ -50,7 +50,7 @@ def create_app(config_class=Config):
             "endpoint": Config.AGENT_ADMIN_ENDPOINT,
         }
         if not session.get('connection_id'):
-            session.clear()
+            # session.clear()
             session["demo"] = demo = await_(provision_demo())
             session["connection_id"] = demo['connection']['connection_id']
             await_(askar.store('demo', session["connection_id"], demo))
@@ -59,7 +59,6 @@ def create_app(config_class=Config):
 
     @app.route("/")
     def index():
-        session["endpoint"] = Config.ENDPOINT
         return render_template("pages/index.jinja")
 
     @app.route("/restart")
