@@ -5,19 +5,27 @@
     <meta charset="utf-8">
     <title>{{ session['title'] }}</title>
     <link rel="icon" href="{{ url_for('static', filename='img/icon.png') }}" type="image/x-icon">
-    <link href="{{url_for('static', filename='css/tabler.min.css')}}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/css/tabler.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
 </head>
 
 <body class="d-flex flex-column">
     <div class="page page-center">
         <div class="container">
+            <div class="text-center mb-4">
+                <a href="{{ url_for('index') }}" class="navbar-brand navbar-brand-autodark">
+                    <center><img
+                            src="https://raw.githubusercontent.com/hyperledger/anoncreds-spec/main/spec/images/logo/hl_anoncreds_colour.svg"
+                            width="100%" alt=""></center>
+                </a>
+            </div>
             {% block page %}{% endblock %}
         </div>
     </div>
     <!-- Libs JS -->
     <!-- Tabler Core -->
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-    <script src="{{ url_for('static', filename='js/tabler.min.js') }}" defer=""></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler.min.js"></script>
 
 </body>
 

@@ -1,0 +1,58 @@
+{% extends('layouts/base.jinja') %}
+{% block page %}
+<div class="card card-md">
+    {% include('components/wizard_header.jinja')%}
+    <div class="card-body text-center">
+        <h1>Presentation Request</h1>
+        <p class="text-secondary">Click button below to recieve a presentation request. Once you have shared the requested claims, continue to the next step.</p>
+    </div>
+
+    <div class="hr-text hr-text-center hr-text-spaceless">Presentation</div>
+
+    <div class="card-body">
+        <div class="row row-cards">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h4 class="card-title m-0">Exchange State</h4>
+                        <div class="text-secondary">
+                            {% if session.demo.presentation_state == 'done' %}
+                            <span class="badge bg-green"></span>
+                            {% elif session.demo.presentation_state == 'request-sent' %}
+                            <span class="badge bg-yellow"></span>
+                            {% else %}
+                            <span class="badge bg-red"></span>
+                            {% endif %}
+                            {{ session.demo.presentation_state }}
+                            {% if session.demo.presentation_verified == 'true' %}
+                            - verified
+                            {% elif session.demo.presentation_verified == 'false' %}
+                            - unverified
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <a href="{{ url_for('verification', revocation=True)}}" class="btn"> Revoke Credential </a>
+                        <a href="{{ url_for('verification', new_request=True)}}" class="btn"> New Request </a>
+                        <a href="{{ url_for('verification')}}" class="btn">Refresh State</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row align-items-center mt-3">
+    <div class="col-4">
+        <a href="{{ url_for('restart') }}" class="btn btn-link link-secondary btn-2"> Restart </a>
+    </div>
+    <div class="col">
+        <div class="btn-list justify-content-end">
+            {% if session.demo.presentation_state == 'done' %}
+            <a href="{{ url_for('results')}}" class="btn btn-primary btn-2"> Continue </a>
+            {% else %}
+            <a href="#" class="btn btn-primary btn-2 disabled"> Continue </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
