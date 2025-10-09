@@ -1,11 +1,11 @@
 from flask import current_app
 from aries_askar import Store
-import hashlib
 import json
 import logging
 from config import Config
 
 logger = logging.getLogger(__name__)
+
 
 class AskarStorage:
     def __init__(self):
@@ -14,9 +14,9 @@ class AskarStorage:
     async def provision(self, recreate=False):
         logger.info(self.db)
         await Store.provision(self.db, "none", recreate=recreate)
-        
+
     async def get_wallet_info(self, client_id):
-        return await self.fetch(category='wallet', data_key=client_id)
+        return await self.fetch(category="wallet", data_key=client_id)
 
     async def open(self):
         return await Store.open(self.db, "none")
@@ -33,7 +33,7 @@ class AskarStorage:
     async def fetch_name_by_tag(self, category, tags):
         store = await self.open()
         try:
-            current_app.logger.warning('Fetching Name')
+            current_app.logger.warning("Fetching Name")
             current_app.logger.warning(category)
             # current_app.logger.warning(tags)
             async with store.session() as session:
@@ -57,7 +57,7 @@ class AskarStorage:
     async def append(self, category, data_key, data, tags=None):
         store = await self.open()
         try:
-            current_app.logger.warning('Appending Data')
+            current_app.logger.warning("Appending Data")
             current_app.logger.warning(category)
             current_app.logger.warning(data_key)
             async with store.session() as session:

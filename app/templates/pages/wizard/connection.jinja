@@ -1,0 +1,54 @@
+{% extends('layouts/base.jinja') %}
+{% block page %}
+<div class="card card-md">
+    {% include('components/wizard_header.jinja')%}
+
+    <div class="card-body text-center">
+        <img width="25%" src="{{ qrcode(session.demo.invitation_url) }}">
+        <h1 class="mt-5">AnonCreds + WebVH Showcase</h1>
+        <p class="text-secondary">Start by scanning the invitation above with a mobile wallet and click continue.</p>
+    </div>
+
+    <div class="hr-text hr-text-center hr-text-spaceless">Connection</div>
+
+    <div class="card-body">
+        <div class="row row-cards">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h4 class="card-title m-0">Connection State</h4>
+                        <div class="text-secondary">
+                            {% if session.demo.connection_state == 'active' %}
+                            <span class="badge bg-green"></span>
+                            {% elif session.demo.connection_state == 'invitation' %}
+                            <span class="badge bg-yellow"></span>
+                            {% else %}
+                            <span class="badge bg-red"></span>
+                            {% endif %}
+                            {{ session.demo.connection_state }}
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <a href="{{ url_for('connection')}}" class="btn">Refresh State</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="row align-items-center mt-3">
+    <div class="col-4">
+        <a href="{{ url_for('restart') }}" class="btn btn-link link-secondary btn-2"> Restart </a>
+    </div>
+    <div class="col">
+        <div class="btn-list justify-content-end">
+            {% if session.demo.connection_state == 'active' %}
+            <a href="{{ url_for('issuance')}}" class="btn btn-primary btn-2"> Continue </a>
+            {% else %}
+            <a href="#" class="btn btn-primary btn-2 disabled"> Continue </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
