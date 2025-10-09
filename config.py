@@ -1,4 +1,5 @@
 import os
+import secrets
 from pathlib import Path
 from dotenv import load_dotenv
 from cachelib.file import FileSystemCache
@@ -28,7 +29,7 @@ class Config(object):
 
     WEBVH_SERVER = os.getenv("WEBVH_SERVER", None)
 
-    SECRET_KEY = os.getenv("SECRET_KEY")
+    SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_urlsafe(16))
 
     DEMO = {
         "issuer": {"name": "AnonCreds WebVH Demo"},
