@@ -1,29 +1,35 @@
 [project]
 name = "anoncreds-vc"
 version = "0.1.0"
-description = ""
+description = "A Flask-based application for anonymous credentials verification"
 authors = [
-    {name = "PatStLouis",email = "patrick.st-louis@opsecid.ca"}
+    {name = "PatStLouis", email = "patrick.st-louis@opsecid.ca"}
 ]
 readme = "README.md"
 requires-python = ">=3.12,<4.0"
 dependencies = [
-    "flask (>=3.1.1,<4.0.0)",
-    "flask-qrcode (>=3.2.0,<4.0.0)",
-    "flask-session (>=0.8.0,<0.9.0)",
-    "flask-cors (>=6.0.0,<7.0.0)",
-    "aries-askar (>=0.4.3,<0.5.0)",
-    "python-dotenv (>=1.0.1,<2.0.0)",
-    "flask-avatars (>=0.2.3,<0.3.0)",
-    "jinja2 (>=3.1.6,<4.0.0)",
-    "pyjokes (>=0.8.3,<0.9.0)",
-    "gunicorn (>=23.0.0,<24.0.0)",
+    "flask>=3.1.1,<4.0.0",
+    "flask-qrcode>=3.2.0,<4.0.0",
+    "flask-session>=0.8.0,<0.9.0",
+    "flask-cors>=6.0.0,<7.0.0",
+    "aries-askar>=0.4.3,<0.5.0",
+    "python-dotenv>=1.0.1,<2.0.0",
+    "flask-avatars>=0.2.3,<0.3.0",
+    "jinja2>=3.1.6,<4.0.0",
+    "pyjokes>=0.8.3,<0.9.0",
+    "gunicorn>=23.0.0,<24.0.0",
+    "requests>=2.32.5",
 ]
 
-[tool.poetry]
-package-mode = false
-
-
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = []
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+dev = []

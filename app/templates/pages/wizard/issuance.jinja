@@ -1,52 +1,190 @@
 {% extends('layouts/base.jinja') %}
 {% block page %}
-<div class="card card-md">
-    {% include('components/wizard_header.jinja')%}
-    <div class="card-body text-center">
-        <h1>Credential Offer</h1>
-        <p class="text-secondary">Click button below to recieve a credential offer. Once you have stored the credential
-            offer, continue to the next step.</p>
-    </div>
-
-    <div class="hr-text hr-text-center hr-text-spaceless">Issuance</div>
-
-    <div class="card-body">
-        <div class="row row-cards">
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <!-- Credential Offer Card -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="ti ti-certificate me-2"></i>
+                    Credential Offer
+                </h3>
+            </div>
             <div class="card-body">
                 <div class="row align-items-center">
-                    <div class="col">
-                        <h4 class="card-title m-0">Exchange State</h4>
-                        <div class="text-secondary">
-                            {% if session.demo.issuance_state == 'done' %}
-                            <span class="badge bg-green"></span>
-                            {% elif session.demo.issuance_state == 'offer-sent' %}
-                            <span class="badge bg-yellow"></span>
-                            {% else %}
-                            <span class="badge bg-red"></span>
-                            {% endif %}
-                            {{ session.demo.issuance_state }}
+                    <div class="col-lg-6">
+                        <div class="text-center mb-4 mb-lg-0">
+                            <div class="shape shape-lg mb-3">
+                                <i class="ti ti-certificate icon icon-2 text-primary"></i>
+                            </div>
+                            <h2 class="mb-3">Receive Your Credential</h2>
+                            <p class="text-muted mb-4">You're about to receive an AnonCreds credential. This credential will be stored securely in your wallet and can be used for future verifications.</p>
                         </div>
                     </div>
-                    <div class="col-auto">
-                        <a href="{{ url_for('issuance', new_offer=True)}}" class="btn"> New Offer </a>
-                        <a href="{{ url_for('issuance')}}" class="btn">Refresh State</a>
+                    <div class="col-lg-6">
+                        <!-- Credential Preview -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="ti ti-id me-2"></i>
+                                    {{ session.demo.credential.name if session.demo.credential else 'Person' }} Credential
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-2">
+                                    {% if session.demo.credential and session.demo.credential.attributes %}
+                                        {% for key, value in session.demo.credential.attributes.items() %}
+                                        <div class="col-6">
+                                            <small class="text-muted d-block">{{ key|title }}</small>
+                                            <div class="fw-bold">
+                                                {% if key == 'dateOfBirth' %}
+                                                    {{ value|format_date }}
+                                                {% else %}
+                                                    {{ value }}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <div class="col-6">
+                                            <small class="text-muted d-block">Given Name</small>
+                                            <div class="fw-bold">Jane</div>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted d-block">Family Name</small>
+                                            <div class="fw-bold">Doe</div>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted d-block">Date of Birth</small>
+                                            <div class="fw-bold">1/1/1991</div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
-<div class="row align-items-center mt-3">
-    <div class="col-4">
-        <a href="{{ url_for('restart') }}" class="btn btn-link link-secondary btn-2"> Restart </a>
-    </div>
-    <div class="col">
-        <div class="btn-list justify-content-end">
-            {% if session.demo.issuance_state == 'done' %}
-            <a href="{{ url_for('verification')}}" class="btn btn-primary btn-2"> Continue </a>
-            {% else %}
-            <a href="#" class="btn btn-primary btn-2 disabled"> Continue </a>
-            {% endif %}
+
+        <!-- Issuance Status Card -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="ti ti-send me-2"></i>
+                    Issuance Status
+                </h3>
+                <div class="card-actions">
+                    <a href="{{ url_for('issuance', new_offer=True) }}" class="btn btn-outline-primary btn-sm me-2">
+                        <i class="ti ti-plus me-1"></i>
+                        New Offer
+                    </a>
+                    <a href="{{ url_for('issuance') }}" class="btn btn-outline-secondary btn-sm">
+                        <i class="ti ti-refresh me-1"></i>
+                        Refresh
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    {% if session.demo.issuance_state == 'done' %}
+                        <div class="shape shape-md me-3">
+                            <i class="ti ti-check icon icon-1 text-success"></i>
+                        </div>
+                        <div class="flex-fill">
+                            <h4 class="mb-1 text-success">Credential Issued</h4>
+                            <p class="text-muted mb-0">Your credential has been successfully issued and stored in your wallet</p>
+                        </div>
+                        <span class="badge bg-green text-green-fg">Completed</span>
+                    {% elif session.demo.issuance_state == 'offer-sent' %}
+                        <div class="shape shape-md me-3">
+                            <i class="ti ti-clock icon icon-1" style="color: #b45309;"></i>
+                        </div>
+                        <div class="flex-fill">
+                            <h4 class="mb-1" style="color: #b45309;">Offer Sent</h4>
+                            <p class="text-muted mb-0">Credential offer has been sent to your wallet. Please accept it to continue.</p>
+                        </div>
+                        <span class="badge bg-yellow text-yellow-fg">Pending</span>
+                    {% else %}
+                        <div class="shape shape-md me-3">
+                            <i class="ti ti-hourglass icon icon-1 text-info"></i>
+                        </div>
+                        <div class="flex-fill">
+                            <h4 class="mb-1" style="color: #6b7280;">Ready to Issue</h4>
+                            <p class="text-muted mb-0">Click "New Offer" to send a credential offer to your wallet</p>
+                        </div>
+                        <span class="badge bg-blue text-blue-fg">Ready</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Issuance Steps -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="ti ti-list me-2"></i>
+                    Issuance Process
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center">
+                            <div class="shape shape-md me-3">
+                                <i class="ti ti-send icon icon-1 text-primary"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Send Offer</h6>
+                                <small class="text-muted">Credential offer is sent to your wallet</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center">
+                            <div class="shape shape-md me-3">
+                                <i class="ti ti-device-mobile icon icon-1 text-info"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Accept in Wallet</h6>
+                                <small class="text-muted">Review and accept the credential in your wallet</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center">
+                            <div class="shape shape-md me-3">
+                                <i class="ti ti-check icon icon-1 text-success"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Credential Stored</h6>
+                                <small class="text-muted">Credential is securely stored in your wallet</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            <a href="{{ url_for('connection') }}" class="btn btn-outline-secondary">
+                <i class="ti ti-arrow-left me-1"></i>
+                Back to Connection
+            </a>
+            <div>
+                {% if session.demo.issuance_state == 'done' %}
+                    <a href="{{ url_for('verification') }}" class="btn btn-primary">
+                        Continue to Verification
+                        <i class="ti ti-arrow-right ms-1"></i>
+                    </a>
+                {% else %}
+                    <button class="btn btn-outline-warning" disabled>
+                        Waiting for Credential
+                        <i class="ti ti-clock ms-1"></i>
+                    </button>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>

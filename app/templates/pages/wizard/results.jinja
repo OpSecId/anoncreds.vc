@@ -1,28 +1,313 @@
 {% extends('layouts/base.jinja') %}
 {% block page %}
-<div class="card card-md">
-    {% include('components/wizard_header.jinja')%}
-    <div class="card-body text-center">
-        <h1>Results</h1>
-        <p class="text-secondary">Congratulations, you completed a round trip of AnonCreds of WebVH issuance and presentation.</p>
-    </div>
-
-    <div class="hr-text hr-text-center hr-text-spaceless">Results</div>
-
-    <div class="card-body">
-        <div class="row row-cards">
-            <div class="card-body">
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <!-- Success Header -->
+        <div class="card border-success">
+            <div class="card-header bg-success text-white text-center">
+                <div class="mb-3">
+                    <i class="ti ti-trophy" style="font-size: 3rem;"></i>
+                </div>
+                <h2 class="mb-2">Congratulations!</h2>
+                <p class="mb-0">You have successfully completed the AnonCreds WebVH demo</p>
+            </div>
+            <div class="card-body text-center">
+                <p class="text-muted mb-4">You've experienced the complete flow of anonymous credentials: connection, issuance, and verification.</p>
             </div>
         </div>
-    </div>
-</div>
-<div class="row align-items-center mt-3">
-    <div class="col-4">
-        <a href="{{ url_for('restart') }}" class="btn btn-link link-secondary btn-2"> Restart </a>
-    </div>
-    <div class="col">
-        <div class="btn-list justify-content-end">
-            <a href="{{ url_for('restart')}}" class="btn btn-primary btn-2"> Restart </a>
+
+        <!-- Results Summary -->
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="shape shape-md mb-3">
+                            <i class="ti ti-device-mobile icon icon-1 text-primary"></i>
+                        </div>
+                        <h4 class="mb-2">Connection</h4>
+                        <p class="text-muted mb-0">Successfully established secure connection with your wallet</p>
+                        <div class="mt-3">
+                            <span class="badge bg-green text-green-fg">Completed</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="shape shape-md mb-3">
+                            <i class="ti ti-certificate icon icon-1 text-info"></i>
+                        </div>
+                        <h4 class="mb-2">Issuance</h4>
+                        <p class="text-muted mb-0">Credential was issued and stored in your wallet</p>
+                        <div class="mt-3">
+                            <span class="badge bg-green text-green-fg">Completed</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="shape shape-md mb-3">
+                            <i class="ti ti-shield-check icon icon-1 text-warning"></i>
+                        </div>
+                        <h4 class="mb-2">Verification</h4>
+                        <p class="text-muted mb-0">Credential was verified and claims validated</p>
+                        <div class="mt-3">
+                            {% if session.demo.presentation_verified == 'true' %}
+                                <span class="badge bg-green text-green-fg">Verified</span>
+                            {% else %}
+                                <span class="badge bg-yellow text-yellow-fg">Pending</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Demo Statistics -->
+        <div class="row row-cards mt-4">
+            <div class="col-lg-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-3">
+                                <div class="shape shape-md">
+                                    <i class="ti ti-check icon icon-1 text-primary"></i>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="h2 mb-0">4</div>
+                                <div class="text-muted">Steps Completed</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-3">
+                                <div class="shape shape-md">
+                                    <i class="ti ti-trophy icon icon-1 text-success"></i>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="h2 mb-0">100%</div>
+                                <div class="text-muted">Success Rate</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-3">
+                                <div class="shape shape-md">
+                                    <i class="ti ti-clock icon icon-1 text-info"></i>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="h2 mb-0">~2min</div>
+                                <div class="text-muted">Average Time</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-3">
+                                <div class="shape shape-md">
+                                    <i class="ti ti-shield-check icon icon-1 text-warning"></i>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="h2 mb-0">{{ session.demo.presentation.attributes|length if session.demo.presentation and session.demo.presentation.attributes else 1 }}</div>
+                                <div class="text-muted">Claims Verified</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Widget -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="ti ti-progress me-2"></i>
+                    Demo Progress
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row g-2 align-items-center">
+                    <div class="col-auto">100%</div>
+                    <div class="col">
+                        <div class="progress progress-lg">
+                            <div class="progress-bar bg-success" style="width: 100%" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" aria-label="Demo completed">
+                                <span class="visually-hidden">Demo completed</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <span class="badge bg-green text-green-fg">Completed</span>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <div class="row g-2">
+                        <div class="col-3">
+                            <div class="text-center">
+                                <div class="h4 mb-1 text-success">✓</div>
+                                <div class="text-muted small">Connection</div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="text-center">
+                                <div class="h4 mb-1 text-success">✓</div>
+                                <div class="text-muted small">Issuance</div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="text-center">
+                                <div class="h4 mb-1 text-success">✓</div>
+                                <div class="text-muted small">Verification</div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="text-center">
+                                <div class="h4 mb-1 text-success">✓</div>
+                                <div class="text-muted small">Results</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- What You Experienced -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="ti ti-chart-bar me-2"></i>
+                    What You Experienced
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-4">
+                            <h5 class="mb-3">Demo Flow</h5>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="ti ti-check text-success me-2"></i>
+                                    <strong>Secure Connection:</strong> Established encrypted communication with your wallet
+                                </li>
+                                <li class="mb-2">
+                                    <i class="ti ti-check text-success me-2"></i>
+                                    <strong>Credential Issuance:</strong> Received and stored a {{ session.demo.credential.name if session.demo.credential else 'Person' }} credential
+                                </li>
+                                <li class="mb-2">
+                                    <i class="ti ti-check text-success me-2"></i>
+                                    <strong>Selective Disclosure:</strong> Shared only {{ session.demo.presentation.attributes|length if session.demo.presentation and session.demo.presentation.attributes else 1 }} required claim(s) for verification
+                                </li>
+                                <li class="mb-2">
+                                    <i class="ti ti-check text-success me-2"></i>
+                                    <strong>Zero-Knowledge Proofs:</strong> Verified claims without revealing unnecessary information
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-4">
+                            <h5 class="mb-3">Key Benefits</h5>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="ti ti-shield text-primary me-2"></i>
+                                    <strong>Privacy:</strong> Only share what's necessary
+                                </li>
+                                <li class="mb-2">
+                                    <i class="ti ti-lock text-primary me-2"></i>
+                                    <strong>Security:</strong> Cryptographic verification of claims
+                                </li>
+                                <li class="mb-2">
+                                    <i class="ti ti-user-check text-primary me-2"></i>
+                                    <strong>Self-Sovereignty:</strong> You control your credentials
+                                </li>
+                                <li class="mb-2">
+                                    <i class="ti ti-world text-primary me-2"></i>
+                                    <strong>Interoperability:</strong> Works across different systems
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Next Steps -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="ti ti-rocket me-2"></i>
+                    What's Next?
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="mb-3">Learn More</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <a href="https://anoncreds.org" target="_blank" class="text-decoration-none">
+                                    <i class="ti ti-external-link me-2"></i>
+                                    AnonCreds Specification
+                                </a>
+                            </li>
+                            <li class="mb-2">
+                                <a href="https://hyperledger.github.io/anoncreds-spec/" target="_blank" class="text-decoration-none">
+                                    <i class="ti ti-external-link me-2"></i>
+                                    Technical Documentation
+                                </a>
+                            </li>
+                            <li class="mb-2">
+                                <a href="https://github.com/hyperledger/anoncreds-spec" target="_blank" class="text-decoration-none">
+                                    <i class="ti ti-external-link me-2"></i>
+                                    GitHub Repository
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="mb-3">Try Again</h5>
+                        <p class="text-muted mb-3">Experience the demo again or explore different scenarios:</p>
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('restart') }}" class="btn btn-primary">
+                                <i class="ti ti-refresh me-2"></i>
+                                Restart Demo
+                            </a>
+                            <a href="{{ url_for('connection') }}" class="btn btn-outline-primary">
+                                <i class="ti ti-arrow-left me-2"></i>
+                                Back to Connection
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="d-flex justify-content-center mt-4">
+            <a href="{{ url_for('restart') }}" class="btn btn-success btn-lg">
+                <i class="ti ti-refresh me-2"></i>
+                Start New Demo
+            </a>
         </div>
     </div>
 </div>

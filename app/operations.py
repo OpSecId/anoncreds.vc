@@ -4,6 +4,8 @@ from datetime import datetime
 from app.utils import query_from_issuer_id, query_from_resource_id
 from app.services import AgentController, AskarStorage
 
+from config import Config
+
 
 agent = AgentController()
 askar = AskarStorage()
@@ -35,6 +37,10 @@ def setup_demo():
         "cred_def_query": query_from_resource_id(cred_def_id),
         "rev_reg_id": rev_reg_id,
         "rev_reg_query": query_from_resource_id(rev_reg_id),
+        "issuer": Config.DEMO.get("issuer"),
+        "credential": Config.DEMO.get("credential"),
+        "presentation": Config.DEMO.get("presentation"),
+        # "registrySize": Config.DEMO.get("registrySize"),
     }
 
 

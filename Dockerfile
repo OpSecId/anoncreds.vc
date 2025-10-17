@@ -2,17 +2,17 @@ FROM python:3.12
 
 WORKDIR /flask
 
-ENV VIRTUAL_ENV=/opt/venv
-RUN python3 -m venv $VIRTUAL_ENV
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
-COPY pyproject.toml ./
+# Copy dependency files
+COPY pyproject.toml uv.lock ./
 
-RUN pip install poetry
-RUN poetry install
+# Install dependencies
+RUN uv sync --frozen
 
 COPY app ./app
 COPY config.py main.py ./
 
 # CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "main:app"]
-CMD [ "python", "main.py" ]
+CMD ["uv", "run", "python", "main.py"]
