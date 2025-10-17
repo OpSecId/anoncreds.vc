@@ -68,25 +68,21 @@
         </div>
 
         <!-- Issuance Status Card -->
-        <div class="card mt-4">
+        <div class="card mt-4" id="issuance-status-card">
             <div class="card-header">
                 <h3 class="card-title">
                     <i class="ti ti-send me-2"></i>
                     Issuance Status
                 </h3>
                 <div class="card-actions">
-                    <a href="{{ url_for('issuance', new_offer=True) }}" class="btn btn-outline-primary btn-sm me-2">
+                    <a href="{{ url_for('issuance', new_offer=True) }}" class="btn btn-outline-primary btn-sm">
                         <i class="ti ti-plus me-1"></i>
                         New Offer
-                    </a>
-                    <a href="{{ url_for('issuance') }}" class="btn btn-outline-secondary btn-sm">
-                        <i class="ti ti-refresh me-1"></i>
-                        Refresh
                     </a>
                 </div>
             </div>
             <div class="card-body">
-                <div class="d-flex align-items-center">
+                <div class="d-flex align-items-center" id="issuance-status-content">
                     {% if session.demo.issuance_state == 'done' %}
                         <div class="shape shape-md me-3">
                             <i class="ti ti-check icon icon-1 text-success"></i>
@@ -104,7 +100,10 @@
                             <h4 class="mb-1" style="color: #b45309;">Offer Sent</h4>
                             <p class="text-muted mb-0">Credential offer has been sent to your wallet. Please accept it to continue.</p>
                         </div>
-                        <span class="badge bg-yellow text-yellow-fg">Pending</span>
+                        <span id="issuance-status-badge" class="badge bg-blue-lt">
+                            <i class="ti ti-refresh spin me-1"></i>
+                            Checking...
+                        </span>
                     {% else %}
                         <div class="shape shape-md me-3">
                             <i class="ti ti-hourglass icon icon-1 text-info"></i>
@@ -188,4 +187,85 @@
         </div>
     </div>
 </div>
+
+<style>
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .spin {
+        display: inline-block;
+        animation: spin 1s linear infinite;
+    }
+    
+    .fade-update {
+        animation: fadeUpdate 0.5s ease-in-out;
+    }
+    
+    @keyframes fadeUpdate {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+</style>
+
+<script>
+    // Auto-refresh functionality for issuance status
+    document.addEventListener('DOMContentLoaded', function() {
+        {% if session.demo.issuance_state != 'done' %}
+            const statusContent = document.getElementById('issuance-status-content');
+            const navigationDiv = document.querySelector('.d-flex.justify-content-between.align-items-center.mt-4');
+            
+            // Auto-refresh every 3 seconds if issuance is not yet complete
+            const autoRefreshInterval = setInterval(async function() {
+                try {
+                    console.log('Checking issuance status...');
+                    
+                    // Fetch the current page (without query parameters)
+                    const response = await fetch("{{ url_for('issuance') }}");
+                    const html = await response.text();
+                    
+                    // Parse the HTML
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    
+                    // Extract the status card content using the specific ID
+                    const newStatusContent = doc.getElementById('issuance-status-content');
+                    const newNavigation = doc.querySelector('.d-flex.justify-content-between.align-items-center.mt-4');
+                    
+                    if (newStatusContent && statusContent) {
+                        // Add fade animation
+                        statusContent.classList.add('fade-update');
+                        
+                        // Update the status content
+                        setTimeout(() => {
+                            statusContent.innerHTML = newStatusContent.innerHTML;
+                            statusContent.classList.remove('fade-update');
+                        }, 250);
+                    }
+                    
+                    // Update navigation buttons
+                    if (newNavigation && navigationDiv) {
+                        navigationDiv.innerHTML = newNavigation.innerHTML;
+                    }
+                    
+                    // Check if issuance is now complete
+                    if (newStatusContent && newStatusContent.innerHTML.includes('Credential Issued')) {
+                        console.log('Credential issued!');
+                        clearInterval(autoRefreshInterval);
+                    }
+                    
+                } catch (error) {
+                    console.error('Error refreshing status:', error);
+                }
+            }, 3000);
+            
+            // Clear interval if page is about to unload
+            window.addEventListener('beforeunload', function() {
+                clearInterval(autoRefreshInterval);
+            });
+        {% endif %}
+    });
+</script>
 {% endblock %}

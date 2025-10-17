@@ -98,7 +98,7 @@ def create_app(config_class=Config):
         session["demo"]["connection_state"] = agent.get_connection(
             session["demo"]["connection_id"]
         ).get("state")
-        print(session["demo"]["issuer_id"])
+        print(session["demo"]["connection_state"])
 
         return render_template("pages/wizard/connection.jinja")
 

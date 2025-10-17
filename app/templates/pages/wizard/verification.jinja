@@ -71,7 +71,7 @@
         </div>
 
         <!-- Verification Status Card -->
-        <div class="card mt-4">
+        <div class="card mt-4" id="verification-status-card">
             <div class="card-header">
                 <h3 class="card-title">
                     <i class="ti ti-shield me-2"></i>
@@ -82,18 +82,14 @@
                         <i class="ti ti-x me-1"></i>
                         Revoke Credential
                     </a>
-                    <a href="{{ url_for('verification', new_request=True) }}" class="btn btn-outline-primary btn-sm me-2">
+                    <a href="{{ url_for('verification', new_request=True) }}" class="btn btn-outline-primary btn-sm">
                         <i class="ti ti-plus me-1"></i>
                         New Request
-                    </a>
-                    <a href="{{ url_for('verification') }}" class="btn btn-outline-secondary btn-sm">
-                        <i class="ti ti-refresh me-1"></i>
-                        Refresh
                     </a>
                 </div>
             </div>
             <div class="card-body">
-                <div class="d-flex align-items-center">
+                <div class="d-flex align-items-center" id="verification-status-content">
                     {% if session.demo.presentation_state == 'done' and session.demo.presentation_verified == 'true' %}
                         <div class="shape shape-md me-3">
                             <i class="ti ti-check icon icon-1 text-success"></i>
@@ -120,7 +116,10 @@
                             <h4 class="mb-1" style="color: #b45309;">Request Sent</h4>
                             <p class="text-muted mb-0">Presentation request has been sent to your wallet. Please respond to continue.</p>
                         </div>
-                        <span class="badge bg-yellow text-yellow-fg">Pending</span>
+                        <span id="verification-status-badge" class="badge bg-blue-lt">
+                            <i class="ti ti-refresh spin me-1"></i>
+                            Checking...
+                        </span>
                     {% else %}
                         <div class="shape shape-md me-3">
                             <i class="ti ti-hourglass icon icon-1 text-info"></i>
@@ -204,4 +203,85 @@
         </div>
     </div>
 </div>
+
+<style>
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .spin {
+        display: inline-block;
+        animation: spin 1s linear infinite;
+    }
+    
+    .fade-update {
+        animation: fadeUpdate 0.5s ease-in-out;
+    }
+    
+    @keyframes fadeUpdate {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+</style>
+
+<script>
+    // Auto-refresh functionality for verification status
+    document.addEventListener('DOMContentLoaded', function() {
+        {% if session.demo.presentation_state != 'done' %}
+            const statusContent = document.getElementById('verification-status-content');
+            const navigationDiv = document.querySelector('.d-flex.justify-content-between.align-items-center.mt-4');
+            
+            // Auto-refresh every 3 seconds if verification is not yet complete
+            const autoRefreshInterval = setInterval(async function() {
+                try {
+                    console.log('Checking verification status...');
+                    
+                    // Fetch the current page (without query parameters)
+                    const response = await fetch("{{ url_for('verification') }}");
+                    const html = await response.text();
+                    
+                    // Parse the HTML
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    
+                    // Extract the status card content using the specific ID
+                    const newStatusContent = doc.getElementById('verification-status-content');
+                    const newNavigation = doc.querySelector('.d-flex.justify-content-between.align-items-center.mt-4');
+                    
+                    if (newStatusContent && statusContent) {
+                        // Add fade animation
+                        statusContent.classList.add('fade-update');
+                        
+                        // Update the status content
+                        setTimeout(() => {
+                            statusContent.innerHTML = newStatusContent.innerHTML;
+                            statusContent.classList.remove('fade-update');
+                        }, 250);
+                    }
+                    
+                    // Update navigation buttons
+                    if (newNavigation && navigationDiv) {
+                        navigationDiv.innerHTML = newNavigation.innerHTML;
+                    }
+                    
+                    // Check if verification is now complete
+                    if (newStatusContent && (newStatusContent.innerHTML.includes('Verification Successful') || newStatusContent.innerHTML.includes('Verification Failed'))) {
+                        console.log('Verification complete!');
+                        clearInterval(autoRefreshInterval);
+                    }
+                    
+                } catch (error) {
+                    console.error('Error refreshing status:', error);
+                }
+            }, 3000);
+            
+            // Clear interval if page is about to unload
+            window.addEventListener('beforeunload', function() {
+                clearInterval(autoRefreshInterval);
+            });
+        {% endif %}
+    });
+</script>
 {% endblock %}

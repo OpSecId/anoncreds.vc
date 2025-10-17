@@ -3,16 +3,25 @@
 <div class="row">
     <div class="col-lg-10 mx-auto">
         <!-- Success Header -->
-        <div class="card border-success">
-            <div class="card-header bg-success text-white text-center">
-                <div class="mb-3">
-                    <i class="ti ti-trophy" style="font-size: 3rem;"></i>
+        <div class="card border-success mb-3" style="background: linear-gradient(135deg, #2fb344 0%, #20c997 100%);">
+            <div class="card-body py-3">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <div class="avatar avatar-lg rounded-circle bg-white text-success">
+                            <i class="ti ti-trophy" style="font-size: 1.75rem;"></i>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <h3 class="text-white mb-1">Congratulations!</h3>
+                        <p class="text-white-50 mb-0">You've successfully completed the AnonCreds demo: connection, issuance, and verification.</p>
+                    </div>
+                    <div class="col-auto">
+                        <span class="badge bg-white text-success badge-pill py-2 px-3">
+                            <i class="ti ti-check me-1"></i>
+                            Complete
+                        </span>
+                    </div>
                 </div>
-                <h2 class="mb-2">Congratulations!</h2>
-                <p class="mb-0">You have successfully completed the AnonCreds WebVH demo</p>
-            </div>
-            <div class="card-body text-center">
-                <p class="text-muted mb-4">You've experienced the complete flow of anonymous credentials: connection, issuance, and verification.</p>
             </div>
         </div>
 
@@ -60,78 +69,6 @@
                             {% else %}
                                 <span class="badge bg-yellow text-yellow-fg">Pending</span>
                             {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Demo Statistics -->
-        <div class="row row-cards mt-4">
-            <div class="col-lg-3">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-3">
-                                <div class="shape shape-md">
-                                    <i class="ti ti-check icon icon-1 text-primary"></i>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="h2 mb-0">4</div>
-                                <div class="text-muted">Steps Completed</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-3">
-                                <div class="shape shape-md">
-                                    <i class="ti ti-trophy icon icon-1 text-success"></i>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="h2 mb-0">100%</div>
-                                <div class="text-muted">Success Rate</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-3">
-                                <div class="shape shape-md">
-                                    <i class="ti ti-clock icon icon-1 text-info"></i>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="h2 mb-0">~2min</div>
-                                <div class="text-muted">Average Time</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-3">
-                                <div class="shape shape-md">
-                                    <i class="ti ti-shield-check icon icon-1 text-warning"></i>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="h2 mb-0">{{ session.demo.presentation.attributes|length if session.demo.presentation and session.demo.presentation.attributes else 1 }}</div>
-                                <div class="text-muted">Claims Verified</div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -300,14 +237,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Navigation -->
-        <div class="d-flex justify-content-center mt-4">
-            <a href="{{ url_for('restart') }}" class="btn btn-success btn-lg">
-                <i class="ti ti-refresh me-2"></i>
-                Start New Demo
-            </a>
         </div>
     </div>
 </div>
