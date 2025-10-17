@@ -11,4 +11,4 @@ if __name__ == "__main__":
     _await(askar.provision(recreate=False))
     if not (demo := _await(askar.fetch("demo", "demo"))):
         _await(askar.store("demo", "demo", setup_demo()))
-    app.run(host="0.0.0.0", port="5001", debug=True)
+    app.run(host="0.0.0.0", port="5000", debug=True)
