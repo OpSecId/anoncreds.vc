@@ -26,6 +26,10 @@
                 <div class="navbar-nav flex-row order-md-last">
                     <div class="nav-item d-none d-md-flex me-3">
                         <div class="btn-list">
+                            <button onclick="toggleVysorPanel()" class="btn btn-outline-primary btn-sm" title="Share Device Screen" id="vysor-toggle-btn">
+                                <i class="ti ti-device-mobile-share me-1"></i>
+                                Share Device
+                            </button>
                             <a href="{{ url_for('restart') }}" class="btn btn-outline-secondary btn-sm" title="Restart Demo">
                                 <i class="ti ti-refresh me-1"></i>
                                 Restart
@@ -134,9 +138,91 @@
         </div>
     </footer>
 
+    <!-- Vysor Side Panel -->
+    <div id="vysor-panel" class="vysor-panel">
+        <div class="vysor-panel-header">
+            <div class="d-flex align-items-center">
+                <i class="ti ti-device-mobile-share me-2"></i>
+                <h4 class="mb-0">Device Screen</h4>
+            </div>
+            <div class="btn-list">
+                <button onclick="promptVysorUrl()" class="btn btn-sm btn-primary" title="Set Vysor URL">
+                    <i class="ti ti-link"></i>
+                </button>
+                <button onclick="toggleVysorPanel()" class="btn btn-sm btn-ghost-secondary" title="Close Panel">
+                    <i class="ti ti-x"></i>
+                </button>
+            </div>
+        </div>
+        <div class="vysor-panel-body">
+            <div id="vysor-placeholder" class="vysor-placeholder">
+                <div class="text-center py-5">
+                    <i class="ti ti-device-mobile-off" style="font-size: 3rem; opacity: 0.3;"></i>
+                    <p class="text-muted mt-3">Click "Set Link" to enter your Vysor share URL</p>
+                    <button onclick="promptVysorUrl()" class="btn btn-primary btn-sm">
+                        <i class="ti ti-link me-1"></i>
+                        Set Vysor URL
+                    </button>
+                </div>
+            </div>
+            <iframe id="vysor-iframe" class="vysor-iframe" style="display: none;"></iframe>
+        </div>
+    </div>
+
     <!-- Libs JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler.min.js"></script>
+    
+    <!-- Vysor Integration -->
+    <script>
+        function toggleVysorPanel() {
+            const panel = document.getElementById('vysor-panel');
+            const btn = document.getElementById('vysor-toggle-btn');
+            const isOpen = panel.classList.contains('vysor-panel-open');
+            
+            if (isOpen) {
+                panel.classList.remove('vysor-panel-open');
+                btn.innerHTML = '<i class="ti ti-device-mobile-share me-1"></i>Share Device';
+            } else {
+                panel.classList.add('vysor-panel-open');
+                btn.innerHTML = '<i class="ti ti-device-mobile-x me-1"></i>Hide Device';
+            }
+        }
+        
+        function promptVysorUrl() {
+            const currentUrl = sessionStorage.getItem('vysor_url') || '';
+            const url = prompt('Enter your Vysor share URL:', currentUrl);
+            
+            if (url && url.trim()) {
+                setVysorUrl(url.trim());
+            }
+        }
+        
+        function setVysorUrl(url) {
+            sessionStorage.setItem('vysor_url', url);
+            
+            const iframe = document.getElementById('vysor-iframe');
+            const placeholder = document.getElementById('vysor-placeholder');
+            
+            iframe.src = url;
+            iframe.style.display = 'block';
+            placeholder.style.display = 'none';
+            
+            // Open panel if not already open
+            const panel = document.getElementById('vysor-panel');
+            if (!panel.classList.contains('vysor-panel-open')) {
+                toggleVysorPanel();
+            }
+        }
+        
+        // Restore Vysor URL on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedUrl = sessionStorage.getItem('vysor_url');
+            if (savedUrl) {
+                setVysorUrl(savedUrl);
+            }
+        });
+    </script>
     
     <!-- Theme Switcher -->
     <script>
@@ -168,6 +254,89 @@
             }
         });
     </script>
+    
+    <!-- Vysor Panel Styles -->
+    <style>
+        .vysor-panel {
+            position: fixed;
+            top: 0;
+            right: -450px;
+            width: 450px;
+            height: 100vh;
+            background: var(--tblr-bg-surface);
+            box-shadow: -4px 0 24px rgba(0,0,0,0.15);
+            z-index: 1050;
+            transition: right 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .vysor-panel-open {
+            right: 0;
+        }
+        
+        .vysor-panel-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--tblr-border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--tblr-bg-surface-secondary);
+        }
+        
+        .vysor-panel-body {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .vysor-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .vysor-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Responsive: hide on mobile */
+        @media (max-width: 768px) {
+            .vysor-panel {
+                width: 100%;
+                right: -100%;
+            }
+        }
+        
+        /* Subtle backdrop when panel is open (very light) */
+        body:has(.vysor-panel-open) .page::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 450px;
+            bottom: 0;
+            background: rgba(0,0,0,0.03);
+            z-index: 1040;
+            animation: fadeIn 0.3s ease;
+            pointer-events: none;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @media (max-width: 768px) {
+            body:has(.vysor-panel-open) .page::before {
+                right: 0;
+            }
+        }
+    </style>
 
 </body>
 
