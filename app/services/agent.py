@@ -88,7 +88,7 @@ class AgentController:
                     "credential_definition": {
                         "issuerId": schema_id.split("/")[0],
                         "schemaId": schema_id,
-                        "tag": Config.DEMO["credential"]["name"],
+                        "tag": Config.DEMO["credential"]["name"] + 'Tag',
                     },
                 },
             )

@@ -78,10 +78,6 @@
                     Verification Status
                 </h3>
                 <div class="card-actions">
-                    <a href="{{ url_for('verification', revocation=True) }}" class="btn btn-outline-danger btn-sm me-2">
-                        <i class="ti ti-x me-1"></i>
-                        Revoke Credential
-                    </a>
                     <a href="{{ url_for('verification', new_request=True) }}" class="btn btn-outline-primary btn-sm">
                         <i class="ti ti-plus me-1"></i>
                         New Request
@@ -189,8 +185,8 @@
             </a>
             <div>
                 {% if session.demo.presentation_state == 'done' %}
-                    <a href="{{ url_for('results') }}" class="btn btn-primary">
-                        View Results
+                    <a href="{{ url_for('revocation') }}" class="btn btn-primary">
+                        Continue to Revocation
                         <i class="ti ti-arrow-right ms-1"></i>
                     </a>
                 {% else %}

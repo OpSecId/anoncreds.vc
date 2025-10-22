@@ -74,7 +74,7 @@
             </div>
             <div class="card-body">
                 <div class="d-flex align-items-center" id="connection-status-content">
-                    {% if session.demo.connection_state == 'active' %}
+                    {% if session.demo.connection_state == 'active' or session.demo.connection_state == 'completed' %}
                         <div class="shape shape-md me-3">
                             <i class="ti ti-check icon icon-1 text-success"></i>
                         </div>
@@ -83,27 +83,48 @@
                             <p class="text-muted mb-0">Your wallet is successfully connected to the demo server</p>
                         </div>
                         <span class="badge bg-green text-green-fg">Active</span>
-                    {% elif session.demo.connection_state == 'invitation' %}
+                    {% elif session.demo.connection_state in ['invitation', 'request', 'response'] %}
                         <div class="shape shape-md me-3">
                             <i class="ti ti-clock icon icon-1" style="color: #b45309;"></i>
                         </div>
                         <div class="flex-fill">
-                            <h4 class="mb-1" style="color: #b45309;">Waiting for Connection</h4>
-                            <p class="text-muted mb-0">Scan the QR code above to establish connection</p>
+                            <h4 class="mb-1" style="color: #b45309;">Connecting...</h4>
+                            <p class="text-muted mb-0">
+                                {% if session.demo.connection_state == 'invitation' %}
+                                    Scan the QR code above to establish connection
+                                {% elif session.demo.connection_state == 'request' %}
+                                    Connection request sent, waiting for response
+                                {% elif session.demo.connection_state == 'response' %}
+                                    Connection response received, finalizing
+                                {% endif %}
+                            </p>
                         </div>
                         <span id="connection-status-badge" class="badge bg-blue-lt">
                             <i class="ti ti-refresh spin me-1"></i>
-                            Checking...
+                            {{ session.demo.connection_state | title }}
                         </span>
-                    {% else %}
+                    {% elif session.demo.connection_state == 'abandoned' or session.demo.connection_state == 'error' %}
                         <div class="shape shape-md me-3">
                             <i class="ti ti-x icon icon-1 text-danger"></i>
                         </div>
                         <div class="flex-fill">
-                            <h4 class="mb-1 text-danger">Not Connected</h4>
-                            <p class="text-muted mb-0">Connection failed or not established</p>
+                            <h4 class="mb-1 text-danger">Connection Failed</h4>
+                            <p class="text-muted mb-0">Connection was abandoned or encountered an error</p>
                         </div>
-                        <span class="badge bg-red text-red-fg">Failed</span>
+                        <span class="badge bg-red text-red-fg">{{ session.demo.connection_state | title }}</span>
+                    {% else %}
+                        <!-- Unknown state - treat as pending to avoid false negatives -->
+                        <div class="shape shape-md me-3">
+                            <i class="ti ti-clock icon icon-1 text-info"></i>
+                        </div>
+                        <div class="flex-fill">
+                            <h4 class="mb-1 text-info">Processing Connection</h4>
+                            <p class="text-muted mb-0">Connection status: <code>{{ session.demo.connection_state }}</code></p>
+                        </div>
+                        <span class="badge bg-info-lt">
+                            <i class="ti ti-refresh spin me-1"></i>
+                            Processing
+                        </span>
                     {% endif %}
                 </div>
             </div>
@@ -116,15 +137,20 @@
                 Restart Demo
             </a>
             <div>
-                {% if session.demo.connection_state == 'active' %}
+                {% if session.demo.connection_state == 'active' or session.demo.connection_state == 'completed' %}
                     <a href="{{ url_for('issuance') }}" class="btn btn-primary">
                         Continue to Issuance
                         <i class="ti ti-arrow-right ms-1"></i>
                     </a>
+                {% elif session.demo.connection_state == 'abandoned' or session.demo.connection_state == 'error' %}
+                    <button class="btn btn-outline-danger" disabled>
+                        Connection Failed
+                        <i class="ti ti-x ms-1"></i>
+                    </button>
                 {% else %}
                     <button class="btn btn-outline-warning" disabled>
+                        <i class="ti ti-refresh spin me-1"></i>
                         Waiting for Connection
-                        <i class="ti ti-clock ms-1"></i>
                     </button>
                 {% endif %}
             </div>
@@ -167,14 +193,14 @@
 <script>
     // Auto-refresh functionality for connection status
     document.addEventListener('DOMContentLoaded', function() {
-        {% if session.demo.connection_state != 'active' %}
+        {% if session.demo.connection_state not in ['active', 'completed', 'abandoned', 'error'] %}
             const statusContent = document.getElementById('connection-status-content');
             const navigationDiv = document.querySelector('.d-flex.justify-content-between.align-items-center.mt-4');
             
             // Auto-refresh every 3 seconds if connection is not yet active
             const autoRefreshInterval = setInterval(async function() {
                 try {
-                    console.log('Checking connection status...');
+                    console.log('Checking connection status... Current: {{ session.demo.connection_state }}');
                     
                     // Fetch the current page
                     const response = await fetch("{{ url_for('connection') }}");
@@ -204,9 +230,32 @@
                         navigationDiv.innerHTML = newNavigation.innerHTML;
                     }
                     
-                    // Check if connection is now active
-                    if (newStatusContent && newStatusContent.innerHTML.includes('Connected')) {
+                    // Check if connection is now active or completed
+                    if (newStatusContent && (newStatusContent.innerHTML.includes('Connected') || newStatusContent.innerHTML.includes('bg-green'))) {
                         console.log('Connection established!');
+                        clearInterval(autoRefreshInterval);
+                        
+                        // Show success notification
+                        const toast = document.createElement('div');
+                        toast.className = 'toast show position-fixed top-0 end-0 m-3';
+                        toast.style.zIndex = '9999';
+                        toast.innerHTML = `
+                            <div class="toast-header bg-success text-white">
+                                <i class="ti ti-check me-2"></i>
+                                <strong class="me-auto">Connection Established</strong>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                            </div>
+                            <div class="toast-body">
+                                You can now continue to credential issuance
+                            </div>
+                        `;
+                        document.body.appendChild(toast);
+                        setTimeout(() => toast.remove(), 5000);
+                    }
+                    
+                    // Stop auto-refresh if in failed state
+                    if (newStatusContent && (newStatusContent.innerHTML.includes('bg-red') || newStatusContent.innerHTML.includes('Connection Failed'))) {
+                        console.log('Connection failed, stopping auto-refresh');
                         clearInterval(autoRefreshInterval);
                     }
                     

@@ -13,7 +13,7 @@
                     </div>
                     <div class="col">
                         <h3 class="text-white mb-1">Congratulations!</h3>
-                        <p class="text-white-50 mb-0">You've successfully completed the AnonCreds demo: connection, issuance, and verification.</p>
+                        <p class="text-white-50 mb-0">You've successfully completed the AnonCreds demo: connection, issuance, verification, and revocation testing.</p>
                     </div>
                     <div class="col-auto">
                         <span class="badge bg-white text-success badge-pill py-2 px-3">
@@ -27,7 +27,7 @@
 
         <!-- Results Summary -->
         <div class="row mt-4">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="card">
                     <div class="card-body text-center">
                         <div class="shape shape-md mb-3">
@@ -41,7 +41,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="card">
                     <div class="card-body text-center">
                         <div class="shape shape-md mb-3">
@@ -55,11 +55,11 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="card">
                     <div class="card-body text-center">
                         <div class="shape shape-md mb-3">
-                            <i class="ti ti-shield-check icon icon-1 text-warning"></i>
+                            <i class="ti ti-shield-check icon icon-1 text-success"></i>
                         </div>
                         <h4 class="mb-2">Verification</h4>
                         <p class="text-muted mb-0">Credential was verified and claims validated</p>
@@ -68,6 +68,26 @@
                                 <span class="badge bg-green text-green-fg">Verified</span>
                             {% else %}
                                 <span class="badge bg-yellow text-yellow-fg">Pending</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="shape shape-md mb-3">
+                            <i class="ti ti-ban icon icon-1 text-danger"></i>
+                        </div>
+                        <h4 class="mb-2">Revocation</h4>
+                        <p class="text-muted mb-0">Revoked credential failed verification as expected</p>
+                        <div class="mt-3">
+                            {% if session.demo.revocation_presentation_verified == 'false' %}
+                                <span class="badge bg-green text-green-fg">Test Passed</span>
+                            {% elif session.demo.revocation_presentation_verified == 'true' %}
+                                <span class="badge bg-yellow text-yellow-fg">Unexpected</span>
+                            {% else %}
+                                <span class="badge bg-blue text-blue-fg">Pending</span>
                             {% endif %}
                         </div>
                     </div>
@@ -99,25 +119,31 @@
                 </div>
                 <div class="mt-3">
                     <div class="row g-2">
-                        <div class="col-3">
+                        <div class="col">
                             <div class="text-center">
                                 <div class="h4 mb-1 text-success">✓</div>
                                 <div class="text-muted small">Connection</div>
                             </div>
                         </div>
-                        <div class="col-3">
+                        <div class="col">
                             <div class="text-center">
                                 <div class="h4 mb-1 text-success">✓</div>
                                 <div class="text-muted small">Issuance</div>
                             </div>
                         </div>
-                        <div class="col-3">
+                        <div class="col">
                             <div class="text-center">
                                 <div class="h4 mb-1 text-success">✓</div>
                                 <div class="text-muted small">Verification</div>
                             </div>
                         </div>
-                        <div class="col-3">
+                        <div class="col">
+                            <div class="text-center">
+                                <div class="h4 mb-1 text-success">✓</div>
+                                <div class="text-muted small">Revocation</div>
+                            </div>
+                        </div>
+                        <div class="col">
                             <div class="text-center">
                                 <div class="h4 mb-1 text-success">✓</div>
                                 <div class="text-muted small">Results</div>
@@ -157,6 +183,10 @@
                                 <li class="mb-2">
                                     <i class="ti ti-check text-success me-2"></i>
                                     <strong>Zero-Knowledge Proofs:</strong> Verified claims without revealing unnecessary information
+                                </li>
+                                <li class="mb-2">
+                                    <i class="ti ti-check text-success me-2"></i>
+                                    <strong>Credential Revocation:</strong> Tested revocation by verifying that a revoked credential fails validation
                                 </li>
                             </ul>
                         </div>

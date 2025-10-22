@@ -65,7 +65,7 @@
                 <div class="container-xl">
                     <!-- Step Indicator -->
                     <ul class="steps steps-green mb-4">
-                        <li class="step-item {{ 'active' if request.endpoint == 'connection' else '' }}">
+                        <li class="step-item {{ 'active' if request.endpoint == 'connection' else 'completed' if session.demo.get('connection_state') == 'active' else '' }}">
                             <i class="ti ti-device-mobile me-2"></i>
                             Connection
                         </li>
@@ -73,9 +73,13 @@
                             <i class="ti ti-certificate me-2"></i>
                             Issuance
                         </li>
-                        <li class="step-item {{ 'active' if request.endpoint == 'verification' else 'completed' if session.demo.get('presentation_verified') else '' }}">
+                        <li class="step-item {{ 'active' if request.endpoint == 'verification' else 'completed' if session.demo.get('presentation_state') == 'done' else '' }}">
                             <i class="ti ti-shield-check me-2"></i>
                             Verification
+                        </li>
+                        <li class="step-item {{ 'active' if request.endpoint == 'revocation' else 'completed' if session.demo.get('revocation_presentation_state') == 'done' else '' }}">
+                            <i class="ti ti-ban me-2"></i>
+                            Revocation
                         </li>
                         <li class="step-item {{ 'active' if request.endpoint == 'results' else '' }}">
                             <i class="ti ti-trophy me-2"></i>

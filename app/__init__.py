@@ -120,11 +120,7 @@ def create_app(config_class=Config):
 
     @app.route("/verification")
     def verification():
-        if request.args.get("revocation"):
-            agent.revoke_credential(session["demo"]["issuance_id"])
-            session["demo"] |= new_presentation(
-                session["demo"]["connection_id"], session["demo"]["cred_def_id"]
-            )
+        # Create initial presentation request if needed
         if not session.get("demo", {}).get("presentation_id") or request.args.get(
             "new_request"
         ):
@@ -139,6 +135,27 @@ def create_app(config_class=Config):
         session["demo"]["presentation_verified"] = presentation_exchange.get("verified")
 
         return render_template("pages/wizard/verification.jinja")
+
+    @app.route("/revocation")
+    def revocation():
+        # Revoke the credential if not already revoked
+        if not session.get("demo", {}).get("credential_revoked"):
+            agent.revoke_credential(session["demo"]["issuance_id"])
+            session["demo"]["credential_revoked"] = True
+            
+            # Create new presentation request after revocation
+            session["demo"] |= new_presentation(
+                session["demo"]["connection_id"], session["demo"]["cred_def_id"]
+            )
+
+        # Get presentation status
+        presentation_exchange = agent.get_presentation_exchange(
+            session["demo"]["presentation_id"]
+        )
+        session["demo"]["revocation_presentation_state"] = presentation_exchange.get("state")
+        session["demo"]["revocation_presentation_verified"] = presentation_exchange.get("verified")
+
+        return render_template("pages/wizard/revocation.jinja")
 
     @app.route("/results")
     def results():
