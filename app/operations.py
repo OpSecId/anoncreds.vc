@@ -1,5 +1,6 @@
 
 from datetime import datetime
+import time
 
 from app.utils import query_from_issuer_id, query_from_resource_id
 from app.services import AgentController, AskarStorage
@@ -23,7 +24,7 @@ def setup_demo():
         .get("credential_definition_state")
         .get("credential_definition_id")
     )
-
+    time.sleep(5)
     rev_reg_id = (
         agent.get_active_registry(cred_def_id).get("result").get("revoc_reg_id")
     )
