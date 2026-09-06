@@ -3,9 +3,24 @@ import secrets
 from pathlib import Path
 from dotenv import load_dotenv
 from cachelib.file import FileSystemCache
+import yaml
 
 load_dotenv()
 Path("session").mkdir(parents=True, exist_ok=True)
+
+_CONFIG_DIR = Path(__file__).resolve().parent
+_DEMO_CONFIG = Path(os.getenv("DEMO_CONFIG", _CONFIG_DIR / "config.yaml"))
+
+
+def _load_demo():
+    with _DEMO_CONFIG.open() as demo_file:
+        demo = yaml.safe_load(demo_file)["demo"]
+
+    predicates = demo.get("presentation", {}).get("predicate") or {}
+    if isinstance(predicates, dict) and predicates:
+        name, (expression, value) = next(iter(predicates.items()))
+        demo["presentation"]["predicate"] = [name, expression, value]
+    return demo
 
 
 class Config(object):
@@ -31,22 +46,4 @@ class Config(object):
 
     SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_urlsafe(16))
 
-    DEMO = {
-        "issuer": {"name": "AnonCreds WebVH Demo"},
-        "credential": {
-            "name": "Person",
-            "version": "1.0",
-            "attributes": {
-                "givenName": "Jane",
-                "familyName": "Doe",
-                "dateOfBirth": "19910101",
-            },
-        },
-        "registrySize": 100,
-        "presentation": {
-            "name": "Over18",
-            "version": "1.0",
-            "attributes": ["familyName"],
-            "predicate": ["dateOfBirth", "<=", 19991231],
-        },
-    }
+    DEMO = _load_demo()

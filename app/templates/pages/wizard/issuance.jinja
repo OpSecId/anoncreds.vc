@@ -27,38 +27,17 @@
                             <div class="card-header">
                                 <h5 class="card-title mb-0">
                                     <i class="ti ti-id me-2"></i>
-                                    {{ session.demo.credential.name if session.demo.credential else 'Person' }} Credential
+                                    {{ session.demo.credential.name }} Credential
                                 </h5>
                             </div>
                             <div class="card-body">
                                 <div class="row g-2">
-                                    {% if session.demo.credential and session.demo.credential.attributes %}
-                                        {% for key, value in session.demo.credential.attributes.items() %}
-                                        <div class="col-6">
-                                            <small class="text-muted d-block">{{ key|title }}</small>
-                                            <div class="fw-bold">
-                                                {% if key == 'dateOfBirth' %}
-                                                    {{ value|format_date }}
-                                                {% else %}
-                                                    {{ value }}
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                        {% endfor %}
-                                    {% else %}
-                                        <div class="col-6">
-                                            <small class="text-muted d-block">Given Name</small>
-                                            <div class="fw-bold">Jane</div>
-                                        </div>
-                                        <div class="col-6">
-                                            <small class="text-muted d-block">Family Name</small>
-                                            <div class="fw-bold">Doe</div>
-                                        </div>
-                                        <div class="col-6">
-                                            <small class="text-muted d-block">Date of Birth</small>
-                                            <div class="fw-bold">1/1/1991</div>
-                                        </div>
-                                    {% endif %}
+                                    {% for key, value in session.demo.credential.attributes.items() %}
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">{{ key|humanize }}</small>
+                                        <div class="fw-bold">{{ value|format_date }}</div>
+                                    </div>
+                                    {% endfor %}
                                 </div>
                             </div>
                         </div>

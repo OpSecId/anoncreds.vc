@@ -13,8 +13,7 @@ from flask_session import Session
 from flask_avatars import Avatars
 from config import Config
 from asyncio import run as await_
-import uuid
-import json
+import re
 import time
 
 # from app.routes.exchanges import bp as exchanges_bp
@@ -43,30 +42,28 @@ def create_app(config_class=Config):
     def id_resolver(s):
         return id_to_resolver_link(s)
 
+    @app.template_filter("humanize")
+    def humanize(value):
+        if value is None:
+            return ""
+        return re.sub(r"([a-z0-9])([A-Z])", r"\1 \2", str(value)).replace("_", " ").title()
+
     @app.template_filter("format_date")
     def format_date(date_value):
         """Format YYYYMMDD date string or integer to readable format"""
-        if not date_value:
+        if date_value is None or date_value == "":
             return date_value
-        
-        # Convert to string if it's an integer
-        if isinstance(date_value, int):
-            date_string = str(date_value)
-        else:
-            date_string = date_value
-            
-        if len(date_string) != 8:
+
+        date_string = str(date_value)
+        if len(date_string) != 8 or not date_string.isdigit():
             return date_string
-            
+
         try:
             year = date_string[:4]
-            month = date_string[4:6]
-            day = date_string[6:8]
-            # Remove leading zeros from month and day
-            month = str(int(month))
-            day = str(int(day))
+            month = str(int(date_string[4:6]))
+            day = str(int(date_string[6:8]))
             return f"{month}/{day}/{year}"
-        except:
+        except Exception:
             return date_string
 
     CORS(app)
@@ -82,9 +79,12 @@ def create_app(config_class=Config):
 
     @app.before_request
     def before_request_callback():
-        if not session.get("demo"):
-            session["demo"] = await_(askar.fetch("demo", "demo"))
-        session["title"] = "AnonCreds VC Demo"
+        demo = session.get("demo") or await_(askar.fetch("demo", "demo")) or {}
+        demo["issuer"] = Config.DEMO.get("issuer")
+        demo["credential"] = Config.DEMO.get("credential")
+        demo["presentation"] = Config.DEMO.get("presentation")
+        session["demo"] = demo
+        session["title"] = Config.APP_TITLE
 
     @app.route("/")
     def index():

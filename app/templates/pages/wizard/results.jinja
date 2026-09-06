@@ -174,11 +174,13 @@
                                 </li>
                                 <li class="mb-2">
                                     <i class="ti ti-check text-success me-2"></i>
-                                    <strong>Credential Issuance:</strong> Received and stored a {{ session.demo.credential.name if session.demo.credential else 'Person' }} credential
+                                    <strong>Credential Issuance:</strong> Received and stored a {{ session.demo.credential.name }} credential
                                 </li>
                                 <li class="mb-2">
                                     <i class="ti ti-check text-success me-2"></i>
-                                    <strong>Selective Disclosure:</strong> Shared only {{ session.demo.presentation.attributes|length if session.demo.presentation and session.demo.presentation.attributes else 1 }} required claim(s) for verification
+                                    <strong>Selective Disclosure:</strong> Presented {{ session.demo.presentation.name }}
+                                    {%- if session.demo.presentation.attributes %} ({{ session.demo.presentation.attributes|map('humanize')|join(', ') }}){% endif %}
+                                    {%- if session.demo.presentation.predicate %} with {{ session.demo.presentation.predicate[0]|humanize }} {{ session.demo.presentation.predicate[1] }} {{ session.demo.presentation.predicate[2]|format_date }}{% endif %}
                                 </li>
                                 <li class="mb-2">
                                     <i class="ti ti-check text-success me-2"></i>

@@ -12,7 +12,7 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen
 
 COPY app ./app
-COPY config.py main.py ./
+COPY config.py config.yaml main.py ./
 
 # CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "main:app"]
 CMD ["uv", "run", "python", "main.py"]

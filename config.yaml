@@ -1,0 +1,18 @@
+demo:
+  issuer:
+    name: AnonCreds WebVH Demo
+  credential:
+    name: Demo Person
+    version: 1.0
+    attributes:
+      givenName: Jane
+      familyName: Doe
+      dateOfBirth: 19991231
+  registrySize: 100
+  presentation:
+    name: Born before 2000
+    version: 1.0
+    attributes:
+      - familyName
+    predicate:
+      dateOfBirth: [<, 20000101]

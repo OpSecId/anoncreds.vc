@@ -64,7 +64,7 @@ class AgentController:
                 json={
                     "schema": {
                         "name": Config.DEMO["credential"]["name"],
-                        "version": Config.DEMO["credential"]["version"],
+                        "version": str(Config.DEMO["credential"]["version"]),
                         "issuerId": issuer_id,
                         "attrNames": [
                             attribute
@@ -88,7 +88,7 @@ class AgentController:
                     "credential_definition": {
                         "issuerId": schema_id.split("/")[0],
                         "schemaId": schema_id,
-                        "tag": Config.DEMO["credential"]["name"] + 'Tag',
+                        "tag": Config.DEMO["credential"]["name"],
                     },
                 },
             )
@@ -141,13 +141,10 @@ class AgentController:
                     "credential_preview": {
                         "@type": "issue-credential/2.0/credential-preview",
                         "attributes": [
-                            {
-                                "name": attribute,
-                                "value": Config.DEMO["credential"]["attributes"][
-                                    attribute
-                                ],
-                            }
-                            for attribute in Config.DEMO["credential"]["attributes"]
+                            {"name": name, "value": str(value)}
+                            for name, value in Config.DEMO["credential"][
+                                "attributes"
+                            ].items()
                         ],
                     },
                     "filter": {
@@ -179,7 +176,7 @@ class AgentController:
                     "presentation_request": {
                         "anoncreds": {
                             "name": Config.DEMO["presentation"]["name"],
-                            "version": Config.DEMO["presentation"]["version"],
+                            "version": str(Config.DEMO["presentation"]["version"]),
                             "nonce": str(randint(1, 99999999)),
                             "requested_attributes": {
                                 "requestedAttributes": {
@@ -251,8 +248,8 @@ class AgentController:
             "credential_preview": {
                 "@type": "issue-credential/2.0/credential-preview",
                 "attributes": [
-                    {"name": attribute, "value": attributes[attribute]}
-                    for attribute in attributes
+                    {"name": name, "value": str(value)}
+                    for name, value in attributes.items()
                 ],
             },
             "filter": {

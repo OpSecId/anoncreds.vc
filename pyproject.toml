@@ -19,6 +19,7 @@ dependencies = [
     "pyjokes>=0.8.3,<0.9.0",
     "gunicorn>=23.0.0,<24.0.0",
     "requests>=2.32.5",
+    "pyyaml>=6.0.3",
 ]
 
 [build-system]
