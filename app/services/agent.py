@@ -21,26 +21,38 @@ class AgentController:
         self.headers["Authorization"] = f"Bearer {token}"
 
     def _try_return(self, response):
+        if not response.ok:
+            print(f"Agent error {response.status_code} {response.url} {response.text}")
+            raise AgentControllerError(
+                f"Agent error {response.status_code} {response.url}: {response.text}"
+            )
         try:
             return response.json()
-
         except Exception:
-            print(f"Agent error {response.status_code} {response.text}")
+            print(f"Agent error {response.status_code} {response.url} {response.text}")
             raise AgentControllerError(
-                f"Agent error {response.status_code} {response.text}"
+                f"Agent error {response.status_code} {response.url}: {response.text}"
             )
 
     def configure_plugin(self):
-        return self._try_return(
-            requests.post(
-                f"{self.endpoint}/did/webvh/configuration",
-                headers=self.headers,
-                json={
-                    "server_url": Config.WEBVH_SERVER,
-                    "witness": True,
-                },
-            )
+        if not Config.WEBVH_SERVER:
+            return None
+
+        response = requests.post(
+            f"{self.endpoint}/did/webvh/configuration",
+            headers=self.headers,
+            json={
+                "server_url": Config.WEBVH_SERVER,
+                "witness": True,
+            },
         )
+        if response.status_code == 404:
+            print(
+                "WebVH configure route not found; "
+                "continuing with agent plugin-config"
+            )
+            return None
+        return self._try_return(response)
 
     def create_did(self):
         return self._try_return(
