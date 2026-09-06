@@ -1,15 +1,25 @@
----
+label: AnonCreds WebVH Demo
+
 admin: [0.0.0.0, 8020]
+# Pass --admin-api-key at runtime to match AGENT_ADMIN_API_KEY.
+# Leave this on only for local bring-up.
+admin-insecure-mode: true
+
 inbound-transport:
-   - [ws, 0:0:0:0:0:0:0:0, 8021]
-   - [http, 0:0:0:0:0:0:0:0, 8022]
+  - [ws, 0.0.0.0, 8021]
+  - [http, 0.0.0.0, 8022]
 outbound-transport: [ws, http]
+endpoint:
+  - https://demo.cloudagent.agency
 
 auto-provision: true
 recreate-wallet: false
+no-ledger: true
 
 wallet-type: askar-anoncreds
-wallet-storage-type: postgres_storage
+wallet-name: anoncreds-vc
+wallet-key: insecure
+wallet-allow-insecure-seed: true
 
 auto-ping-connection: true
 auto-accept-invites: true
@@ -17,7 +27,6 @@ auto-accept-requests: true
 auto-respond-messages: true
 
 auto-store-credential: true
-
 auto-respond-credential-offer: true
 auto-respond-credential-request: true
 auto-respond-credential-proposal: true
@@ -29,11 +38,8 @@ preserve-exchange-records: true
 
 plugin:
   - webvh
-  # - oid4vc
   - status_list.v1_0
   - connection_update.v1_0
-  # - basicmessage_storage.v1_0
-  # - multitenant_provider.v1_0
 
 plugin-config-value:
-  - did-webvh.server_url=https://id.anoncreds.vc
+  - webvh.server_url=https://sandbox.bcvh.vonx.io
